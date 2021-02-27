@@ -5,15 +5,33 @@
     <ClCompile Include="App.cpp">
       <Filter>App</Filter>
     </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="App">
       <UniqueIdentifier>{91022e8e-8bd2-46ee-9cd3-740b2bbe205b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{982e11e8-328c-4465-be16-04d281aac6cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{1f20a7b0-2d19-494d-a8cb-060bbedfa819}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
       <Filter>App</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
