@@ -7,8 +7,6 @@ Camera::Camera() {
 void Camera::rotate(glm::vec3 v) {
 	rotation = v;
 
-	std::cout << rotation.y << ":" << rotation.z << std::endl;
-
 	glm::vec3 r = glm::radians(v);
 
 	roll = {

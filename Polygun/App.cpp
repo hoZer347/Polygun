@@ -17,9 +17,6 @@ App::App() {
     // Setting the functions that happens every input
     glfwSetKeyCallback(window, KeyboardCallBack);
 
-    // Setting number of buffers created before rendering
-    glfwSwapInterval(1);
-
     // Testing stuff to be removed
     Object* o = new Object();
 
@@ -70,9 +67,6 @@ void App::init() {
         for (auto& o : objects)
             o->render();
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
         age++;
 
         if (glfwGetKey(window, GLFW_KEY_SPACE))         cam += glm::vec3( 0,   -0.1,  0   );
@@ -83,6 +77,10 @@ void App::init() {
         if (glfwGetKey(window, GLFW_KEY_S))             cam += glm::vec3( 0,    0,   -0.1 );
         if (glfwGetKey(window, GLFW_KEY_D))             cam += glm::vec3(-0.1,  0,    0   );
         
+        glfwSwapInterval(1);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
         double end_time = glfwGetTime();
 
         while (end_time - start_time < 1/60)
