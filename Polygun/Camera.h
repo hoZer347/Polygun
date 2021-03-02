@@ -5,6 +5,8 @@
 #include <glut.h>
 #include <glfw3.h>
 
+#include <math.h>
+
 class Camera {
 public:
 	void operator+=(glm::vec3);

@@ -60,7 +60,7 @@ void App::init() {
 
         glMatrixMode(GL_MODELVIEW_MATRIX);
         mouse();
-        cam.rotate(glm::vec3(mx/4, my/4, 0));
+        cam.rotate(glm::vec3(0, mx/4, 0));
         cam.update();
 
         for (auto& o : objects)
@@ -74,10 +74,36 @@ void App::init() {
         if (glfwGetKey(window, GLFW_KEY_SPACE)) cam += glm::vec3(0, -0.01, 0);
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) cam += glm::vec3(0, 0.01, 0);
 
+        if (glfwGetKey(window, GLFW_KEY_W)) cam.pos += glm::vec3(
+            -std::sin(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1,
+            0,
+            std::cos(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1
+        );
+
+        if (glfwGetKey(window, GLFW_KEY_A)) cam.pos += glm::vec3(
+            std::cos(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1,
+            0,
+            std::sin(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1
+        );
+
+        if (glfwGetKey(window, GLFW_KEY_S)) cam.pos += glm::vec3(
+            std::sin(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1,
+            0,
+            -std::cos(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1
+        );
+
+        if (glfwGetKey(window, GLFW_KEY_D)) cam.pos += glm::vec3(
+            -std::cos(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1,
+            0,
+            -std::sin(std::atan(1) * 4 * cam.rotation.y / 180) * 0.1
+        );
+
         double end_time = glfwGetTime();
 
         while (end_time - start_time < 1/60)
             end_time = glfwGetTime();
+
+        std::cout << cam.rotation.y << std::endl;
     }
 }
 

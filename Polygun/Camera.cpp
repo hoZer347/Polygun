@@ -7,9 +7,11 @@ void Camera::rotate(glm::vec3 v) {
 }
 
 void Camera::update() {
-	glTranslatef(pos.x, pos.y, pos.z);
 	// glRotatef(rotation.x, 1, 0, 0);
+	glRotatef(rotation.y, 0, 1, 0);
 	// glRotatef(rotation.z, 0, 0, 1);
+
+	glTranslatef(pos.x, pos.y, pos.z);
 }
 
 void Camera::operator+=(glm::vec3 v) {
