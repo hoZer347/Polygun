@@ -6,7 +6,6 @@
 #include <glfw3.h>
 #include <gtc/matrix_transform.hpp>
 
-#include "Cube.h"
 #include <iostream>
 
 class Camera {
@@ -17,7 +16,7 @@ public:
 	void operator-=(glm::vec3);
 
 	void rotate(glm::vec3);
-	void update(GLFWwindow*);
+	void update();
 
 	int distance = 5;
 
@@ -28,8 +27,6 @@ public:
 	glm::vec3 rotation = { 0, 0, 0 };
 	glm::mat4x4 r_mat;
 	glm::mat4x4 view;				   // Translation Matrix
-
-	Cube focus = Cube("cube");
 
 	glm::mat3x3 roll;
 	glm::mat3x3 yaw;

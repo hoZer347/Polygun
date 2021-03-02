@@ -9,6 +9,6 @@ public:
 	};
 
 	void load();
-	void render(GLFWwindow*);
+	void render();
 };
 

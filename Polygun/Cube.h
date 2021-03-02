@@ -10,6 +10,6 @@ public:
 
 	// Inheritted
 	void load();
-	void render(GLFWwindow*);
+	void render();
 };
 

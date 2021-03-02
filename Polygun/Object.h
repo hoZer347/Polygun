@@ -14,7 +14,9 @@ public:
 	Object();
 	~Object();
 
-	void render(GLFWwindow*);
+	void render();
+
+	double distance = 0;
 
 	std::vector<Geometry*> geometry;
 };

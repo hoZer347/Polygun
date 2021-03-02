@@ -20,18 +20,16 @@ App::App() {
     // Setting number of buffers created before rendering
     glfwSwapInterval(1);
 
-    objects.push_back(&player);
-
     // Testing stuff to be removed
     Object* o = new Object();
+
+    o->geometry.push_back(new Plane("plane"));
+    objects.push_back(o);
+    o = new Object();
     Cube* cube = new Cube("test");
     *cube -= glm::vec3(1, 1.1, 0);
     o->geometry.push_back(cube);
 
-    objects.push_back(o);
-    o = new Object();
-
-    o->geometry.push_back(new Plane("plane"));
     objects.push_back(o);
     //
 }
@@ -67,10 +65,10 @@ void App::init() {
         glMatrixMode(GL_MODELVIEW_MATRIX);
         mouse();
         cam.rotate(glm::vec3(0, mx/4, my/4));
-        cam.update(window);
+        cam.update();
 
         for (auto& o : objects)
-            o->render(window);
+            o->render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

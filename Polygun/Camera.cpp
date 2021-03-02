@@ -30,7 +30,7 @@ void Camera::rotate(glm::vec3 v) {
 	};
 }
 
-void Camera::update(GLFWwindow* w) {
+void Camera::update() {
 	glm::vec3 r = glm::radians(rotation);
 	glRotatef(rotation.y, 0, 1, 0);
 	glRotatef(rotation.z, cos(r.y), 0, sin(r.y));

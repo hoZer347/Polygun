@@ -17,9 +17,11 @@
     <ClCompile Include="Cube.cpp">
       <Filter>Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Plane.cpp">
       <Filter>Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +36,9 @@
     </Filter>
     <Filter Include="Geometry">
       <UniqueIdentifier>{53b32ea4-2bbe-4502-842c-2c0dff77010b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{037fbdf3-5f2e-4a08-a786-dca5bff1f128}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -52,9 +57,11 @@
     <ClInclude Include="Cube.h">
       <Filter>Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="Plane.h">
       <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

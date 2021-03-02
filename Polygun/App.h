@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <list>
 #include <vector>
 
 #include "Object.h"
@@ -37,6 +38,8 @@ private:
 	Camera cam;
 
 	double mx = 0, my = 0;
+
+	int render_distance = 1000;
 
 	std::vector<Object*> objects;
 };

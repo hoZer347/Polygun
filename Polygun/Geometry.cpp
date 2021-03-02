@@ -19,11 +19,33 @@ void Geometry::operator+=(glm::vec3 V) {
 		*v += V.z;
 		v++;
 	}
+	
+	v = frame.begin();
+
+	while (v != frame.end()) {
+		*v += V.x;
+		v++;
+		*v += V.y;
+		v++;
+		*v += V.z;
+		v++;
+	}
 }
 void Geometry::operator-=(glm::vec3 V) {
 	auto v = vertices.begin();
 
 	while (v != vertices.end()) {
+		*v -= V.x;
+		v++;
+		*v -= V.y;
+		v++;
+		*v -= V.z;
+		v++;
+	}
+
+	v = frame.begin();
+
+	while (v != frame.end()) {
 		*v -= V.x;
 		v++;
 		*v -= V.y;
@@ -37,9 +59,19 @@ void Geometry::operator*=(int i) {
 		v *= i;
 
 	scale *= i;
+
+	for (auto& v : frame)
+		v *= i;
+
+	scale *= i;
 }
 void Geometry::operator/=(int i) {
-	for (auto& v : vertices)
+	for (auto& v : frame)
+		v /= i;
+
+	scale /= i;
+
+	for (auto& v : frame)
 		v /= i;
 
 	scale /= i;

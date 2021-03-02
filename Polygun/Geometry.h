@@ -18,12 +18,13 @@ public:
 	void operator/=(int);
 
 	virtual void load()=0;
-	virtual void render(GLFWwindow*)=0;
+	virtual void render()=0;
 
 	const char* name = NULL;
 	int scale = 1;
 
 	std::vector<GLfloat> vertices;
+	std::vector<GLfloat> frame;
 
 	glm::vec3 pos = { 0, 0, 0 };
 };

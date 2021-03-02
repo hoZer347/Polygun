@@ -9,7 +9,7 @@ void Plane::load() {
     };
 }
 
-void Plane::render(GLFWwindow* window) {
+void Plane::render() {
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, vertices.data());
     glColor3f(0, 0, 1);

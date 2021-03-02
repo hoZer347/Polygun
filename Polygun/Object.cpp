@@ -8,7 +8,7 @@ Object::~Object() {
 
 }
 
-void Object::render(GLFWwindow* window) {
+void Object::render() {
 	for (auto& g : geometry)
-		g->render(window);
+		g->render();
 }
