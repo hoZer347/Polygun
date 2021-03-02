@@ -1,10 +1,11 @@
 #include "App.h"
 
 App::App() {
-
     // Creating window
     window = glfwCreateWindow(640, 640, "Polygun!!!", NULL, NULL);
     if (!window) {  glfwTerminate(); exit(EXIT_FAILURE); }
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Making it the focused window for glfw
     glfwMakeContextCurrent(window);
@@ -13,11 +14,26 @@ App::App() {
     if (glewInit() != GLEW_OK)
         exit(EXIT_FAILURE);
    
-    // Setting the function that happens every frame (NULL for now)
+    // Setting the functions that happens every input
     glfwSetKeyCallback(window, KeyboardCallBack);
 
     // Setting number of buffers created before rendering
     glfwSwapInterval(1);
+
+    objects.push_back(&player);
+
+    // Testing stuff to be removed
+    Object* o = new Object();
+    Cube* cube = new Cube("test");
+    *cube -= glm::vec3(1, 1.1, 0);
+    o->geometry.push_back(cube);
+
+    objects.push_back(o);
+    o = new Object();
+
+    o->geometry.push_back(new Plane("plane"));
+    objects.push_back(o);
+    //
 }
 
 App::~App() {
@@ -25,12 +41,12 @@ App::~App() {
 }
 
 void App::init() {
-    Object o;
-
     int age = 0;
 
     // Main game loop
     while (!glfwWindowShouldClose(window)) {
+        double start_time = glfwGetTime();
+
         GLint windowWidth, windowHeight;
         glfwGetWindowSize(window, &windowWidth, &windowHeight);
         glViewport(0, 0, windowWidth, windowHeight);
@@ -43,31 +59,38 @@ void App::init() {
         gluPerspective(60, (double)windowWidth / (double)windowHeight, 0.1, 100);
 
         glMatrixMode(GL_MODELVIEW_MATRIX);
-        glTranslatef(0, 0, -5);
+        mouse();
+        cam.rotate(glm::vec3(mx/4, my/4, 0));
+        cam.update();
 
-        glRotatef(age, 0, 1, 0);
-
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 0, player.vertices);
-        glDrawArrays(GL_QUADS, 0, 24);
-
-
-        glDisableClientState(GL_VERTEX_ARRAY);
+        for (auto& o : objects)
+            o->render(window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
 
         age++;
+
+        if (glfwGetKey(window, GLFW_KEY_SPACE)) cam += glm::vec3(0, -0.01, 0);
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)) cam += glm::vec3(0, 0.01, 0);
+
+        double end_time = glfwGetTime();
+
+        while (end_time - start_time < 1/60)
+            end_time = glfwGetTime();
     }
 }
 
 void App::KeyboardCallBack(GLFWwindow* w, int key, int scancode, int action, int mods) {
     switch (key) {
-    case GLFW_KEY_W:
-        
+    case GLFW_KEY_ESCAPE:
+        exit(0);
         break;
-    case GLFW_KEY_S:
+    case GLFW_KEY_TAB:
+        auto monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
+        glfwSetWindowMonitor(w, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
         break;
     }
 }

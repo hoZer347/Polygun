@@ -1,12 +1,14 @@
 #include "Object.h"
 
 Object::Object() {
-	for (auto& i : vertices)
-		i / 20;
+
 }
 
 Object::~Object() {
 
 }
 
-
+void Object::render(GLFWwindow* window) {
+	for (auto& g : geometry)
+		g->render(window);
+}

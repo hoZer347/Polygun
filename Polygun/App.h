@@ -14,17 +14,18 @@
 
 #include "Object.h"
 #include "Player.h"
+#include "Camera.h"
+#include "Plane.h"
+
+#include "math.h"
 
 class App {
 public:
 	App();
 	~App();
 
+	void mouse() { glfwGetCursorPos(window, &mx, &my); }
 	void init();
-	void move_player() {
-		for (auto& i : player.vertices)
-			i += 1;
-	};
 
 	// Called every time a input is detected
 	static void KeyboardCallBack(GLFWwindow*, int, int, int, int);
@@ -33,6 +34,9 @@ private:
 	GLFWwindow* window;
 
 	Player player;
+	Camera cam;
+
+	double mx = 0, my = 0;
 
 	std::vector<Object*> objects;
 };
