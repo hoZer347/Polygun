@@ -24,7 +24,7 @@ public:
 	App();
 	~App();
 
-	void mouse() { glfwGetCursorPos(window, &mx, &my); }
+	void mouse();
 	void init();
 
 	// Called every time a input is detected
