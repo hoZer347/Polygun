@@ -10,9 +10,9 @@ void Camera::rotate(glm::vec3 v) {
 	glm::vec3 r = glm::radians(v);
 
 	roll = {
-	cos(r.x),	-sin(r.x),	0,
-	sin(r.x),	cos(r.x),	0,
-	0,			0,			1
+		cos(r.x),	-sin(r.x),	0,
+		sin(r.x),	cos(r.x),	0,
+		0,			0,			1
 	};
 
 	yaw = {
