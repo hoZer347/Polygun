@@ -22,6 +22,7 @@
 #include "Cube.h"
 #include "Camera.h"
 #include "Object.h"
+#include "Field.h"
 
 #define SHADER_DIRECTORY "C:/Users/liam/source/repos/Polygun/Polygun/"
 
@@ -30,6 +31,7 @@ public:
 	App();
 	~App();
 
+	// Shader stuff
 	std::string LF(std::string filename) {
 		const char* char_file = filename.c_str();
 		std::ifstream f;
@@ -105,11 +107,15 @@ public:
 
 		return shader;
 	}
+	//
 
+	// Starts the game loop
 	void init();
-	void pump(std::vector<GLfloat>, GLenum);
 
-		// INPUT FUNCTIONS //
+	// Pumps an array of vertices into the vertex buffer
+	void pump(std::vector<GLfloat>&, GLenum);
+
+		// --Inputs functions-- //
 	// Does input polls
 	void do_inputs();
 
@@ -119,19 +125,29 @@ public:
 	static void MouseBCallback(GLFWwindow*, int, int, int);
 	static void ResizeCallback(GLFWwindow*, int, int);
 	static void ScrollCallback(GLFWwindow*, double, double);
-		// -------------- //
+		// -------------------- //
 
 private:
+		// --Stuff for rendering-- //
 	GLuint shader=0, mvpID=0, clrID=0, vertexbuffer=0, VertexArrayID=0;
 	GLFWwindow* window;
+
+	bool do_verts = true;
+	bool do_frame = true;
 
 	std::vector<GLfloat> vertices;
 	std::vector<GLfloat> frame;
 
+	Camera cam;
+		// ----------------------- //
+
+
+		// --Stuff for physics-- //
+	// Object manager (change to its own class with collision)
 	std::vector<Object*> objects;
 
-	double mx=0, my=0;
-
-	Camera cam;
+	// Manages the floor of the world using a lambda
+	Field* field = NULL;
+		// --------------------- //
 };
 

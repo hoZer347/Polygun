@@ -7,7 +7,6 @@
 
 class Geometry {
 public:
-
 	void operator+=(glm::vec3);
 	void operator*=(GLfloat);
 

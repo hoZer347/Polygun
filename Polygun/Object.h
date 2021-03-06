@@ -4,6 +4,7 @@
 
 class Object {
 public:
+
 	std::vector<Geometry*> geo;
 
 private:

@@ -23,7 +23,6 @@ void Geometry::operator+=(glm::vec3 v) {
 		it++;
 	}
 }
-
 void Geometry::operator*=(GLfloat f) {
 	for (auto& v : vertices)
 		v *= f;
