@@ -1,78 +1,33 @@
 #include "Geometry.h"
 
-Geometry::Geometry(const char* n="shape") {
-	name = n;
-}
+void Geometry::operator+=(glm::vec3 v) {
+	auto it = vertices.begin();
 
-Geometry::~Geometry() {
-
-}
-
-void Geometry::operator+=(glm::vec3 V) {
-	auto v = vertices.begin();
-
-	while (v != vertices.end()) {
-		*v += V.x;
-		v++;
-		*v += V.y;
-		v++;
-		*v += V.z;
-		v++;
-	}
-	
-	v = frame.begin();
-
-	while (v != frame.end()) {
-		*v += V.x;
-		v++;
-		*v += V.y;
-		v++;
-		*v += V.z;
-		v++;
-	}
-}
-void Geometry::operator-=(glm::vec3 V) {
-	auto v = vertices.begin();
-
-	while (v != vertices.end()) {
-		*v -= V.x;
-		v++;
-		*v -= V.y;
-		v++;
-		*v -= V.z;
-		v++;
+	while (it != vertices.end()) {
+		*it += v.x;
+		it++;
+		*it += v.y;
+		it++;
+		*it += v.z;
+		it++;
 	}
 
-	v = frame.begin();
+	it = frame.begin();
 
-	while (v != frame.end()) {
-		*v -= V.x;
-		v++;
-		*v -= V.y;
-		v++;
-		*v -= V.z;
-		v++;
+	while (it != frame.end()) {
+		*it += v.x;
+		it++;
+		*it += v.y;
+		it++;
+		*it += v.z;
+		it++;
 	}
 }
-void Geometry::operator*=(int i) {
+
+void Geometry::operator*=(GLfloat f) {
 	for (auto& v : vertices)
-		v *= i;
-
-	scale *= i;
+		v *= f;
 
 	for (auto& v : frame)
-		v *= i;
-
-	scale *= i;
-}
-void Geometry::operator/=(int i) {
-	for (auto& v : frame)
-		v /= i;
-
-	scale /= i;
-
-	for (auto& v : frame)
-		v /= i;
-
-	scale /= i;
+		v *= f;
 }

@@ -2,66 +2,55 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="App.cpp">
-      <Filter>App</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Player</Filter>
-    </ClCompile>
     <ClCompile Include="Geometry.cpp">
       <Filter>Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="Cube.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Plane.cpp">
-      <Filter>Geometry</Filter>
+    <ClCompile Include="App.cpp">
+      <Filter>App</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="App">
-      <UniqueIdentifier>{91022e8e-8bd2-46ee-9cd3-740b2bbe205b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Object">
-      <UniqueIdentifier>{982e11e8-328c-4465-be16-04d281aac6cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Player">
-      <UniqueIdentifier>{1f20a7b0-2d19-494d-a8cb-060bbedfa819}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Geometry">
-      <UniqueIdentifier>{53b32ea4-2bbe-4502-842c-2c0dff77010b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{037fbdf3-5f2e-4a08-a786-dca5bff1f128}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="App.h">
-      <Filter>App</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
+    <ClCompile Include="Cube.cpp">
+      <Filter>Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
       <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Player</Filter>
-    </ClInclude>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Geometry.h">
       <Filter>Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Plane.h">
-      <Filter>Geometry</Filter>
+    <ClInclude Include="App.h">
+      <Filter>App</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Geometry">
+      <UniqueIdentifier>{95e2ed78-4cac-4391-9fe2-05a981ae5bb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{a19a8e4a-2c54-48ba-9055-9f820b06fc9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{f83a9a9b-10f7-4d6a-b9ba-e2d061735f32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{33372dc4-d5df-4a96-9c63-fa3005c4a441}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

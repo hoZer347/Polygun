@@ -1,103 +1,176 @@
 #include "App.h"
 
 App::App() {
-    // Creating window
-    window = glfwCreateWindow(640, 640, "Polygun!!!", NULL, NULL);
-    if (!window) {  glfwTerminate(); exit(EXIT_FAILURE); }
+	window = glfwCreateWindow(1024, 768, "Polygun", NULL, NULL);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwMakeContextCurrent(window);
 
-    // Making it the focused window for glfw
-    glfwMakeContextCurrent(window);
+	// Enabling openGL to do stuff
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_GREATER, 0.5);
+	glEnable(GL_ALPHA_TEST);
 
-    // Initializing glew
-    if (glewInit() != GLEW_OK)
-        exit(EXIT_FAILURE);
-   
-    // Setting the functions that happens every input
-    glfwSetKeyCallback(window, KeyboardCallBack);
+	glewExperimental = true;
 
-    // Testing stuff to be removed
-    Object* o = new Object();
+	if (glewInit() != GLEW_OK)
+		exit(0);
 
-    o->geometry.push_back(new Plane("plane"));
-    objects.push_back(o);
-    o = new Object();
-    Cube* cube = new Cube("test");
-    *cube -= glm::vec3(1, 1.1, 0);
-    o->geometry.push_back(cube);
+	glfwSetWindowUserPointer(window, this);
 
-    objects.push_back(o);
-    //
+	glfwSetCursorPosCallback(window, CursorCallback);
+	glfwSetKeyCallback(window, KeyPrsCallback);
+	glfwSetMouseButtonCallback(window, MouseBCallback);
+	glfwSetWindowSizeCallback(window, ResizeCallback);
+	glfwSetScrollCallback(window, ScrollCallback);
+
+	// Testing objects
+	Object* o = new Object();
+	Cube* cube = new Cube();
+	*cube += glm::vec3(-0.5, -0.5, -0.5);
+	o->geo.push_back(cube);
+	objects.push_back(o);
+	//
 }
 
 App::~App() {
-    glfwDestroyWindow(window);
-}
 
-void App::mouse() {
-    glfwGetCursorPos(window, &mx, &my);
-    if (my > 90*4) glfwSetCursorPos(window, mx, 90*4);
-    else if (my < -90*4) glfwSetCursorPos(window, mx, -90*4);
 }
 
 void App::init() {
-    int age = 0;
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-    // Main game loop
-    while (!glfwWindowShouldClose(window)) {
-        double start_time = glfwGetTime();
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
 
-        GLint windowWidth, windowHeight;
-        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-        glViewport(0, 0, windowWidth, windowHeight);
+	shader = LS("shader");
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	mvpID = glGetUniformLocation(shader, "MVP");
+	clrID = glGetUniformLocation(shader, "fcolor");
 
-        glMatrixMode(GL_PROJECTION_MATRIX);
-        glLoadIdentity();
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 
-        gluPerspective(60, (double)windowWidth / (double)windowHeight, 0.1, 100);
+	glfwSetCursorPos(window, 0, 0);
 
-        glMatrixMode(GL_MODELVIEW_MATRIX);
-        mouse();
-        cam.rotate(glm::vec3(0, mx/4, my/4));
-        cam.update();
+	do {
+		double start_time = glfwGetTime();
 
-        for (auto& o : objects)
-            o->render();
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        age++;
+		// Pumping vertices into vertex buffer
+		for (auto& o : objects)
+			for (auto& g : o->geo) {
+				vertices.insert(vertices.end(), g->vertices.begin(), g->vertices.end());
+				frame.insert(frame.end(), g->frame.begin(), g->frame.end());
+			}
 
-        if (glfwGetKey(window, GLFW_KEY_SPACE))         cam += glm::vec3( 0,   -0.1,  0   );
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))    cam += glm::vec3( 0,    0.1,  0   );
+		cam.Projection = glm::perspective(cam.FoV, cam.aspectRatio, 0.1f, cam.renderDistance);
 
-        if (glfwGetKey(window, GLFW_KEY_W))             cam += glm::vec3( 0,    0,    0.1 );
-        if (glfwGetKey(window, GLFW_KEY_A))             cam += glm::vec3( 0.1,  0,    0   );
-        if (glfwGetKey(window, GLFW_KEY_S))             cam += glm::vec3( 0,    0,   -0.1 );
-        if (glfwGetKey(window, GLFW_KEY_D))             cam += glm::vec3(-0.1,  0,    0   );
-        
-        glfwSwapInterval(1);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+		pump(vertices, GL_TRIANGLES);
+		pump(frame, GL_LINE_LOOP);
 
-        double end_time = glfwGetTime();
+		// Swap buffers
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+		do_inputs();
 
-        while (end_time - start_time < 1/60)
-            end_time = glfwGetTime();
-    }
+		double end_time = glfwGetTime();
+
+		while (end_time - start_time < 1 / 60)
+			end_time = glfwGetTime();
+
+	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+		glfwWindowShouldClose(window) == 0);
+
+	// Cleanup VBO and shader
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteProgram(shader);
+	glDeleteVertexArrays(1, &VertexArrayID);
+
+	// Close OpenGL window and terminate GLFW
+	glfwTerminate();
+
+	return;
 }
 
-void App::KeyboardCallBack(GLFWwindow* w, int key, int scancode, int action, int mods) {
-    switch (key) {
-    case GLFW_KEY_ESCAPE:
-        exit(0);
-        break;
-    case GLFW_KEY_TAB:
-        auto monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+void App::pump(std::vector<GLfloat> v, GLenum type) {
+	glUseProgram(shader);
 
-        glfwSetWindowMonitor(w, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-        break;
-    }
+	int size = v.size();
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_STATIC_DRAW);
+
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.update()[0][0]);
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,
+		3,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0
+	);
+
+	switch (type) {
+	case GL_TRIANGLES:
+		glUniform4f(clrID, 1, 1, 1, 1);
+		glDrawArrays(type, 0, size);
+		break;
+	case GL_LINE_LOOP:
+		glUniform4f(clrID, 0, 0, 0, 1);
+		for (int i = 0; i < size/2; i++)
+			glDrawArrays(type, i*2, 2);
+	}
+
+	glDisableVertexAttribArray(0);
+
+	v.clear();
+}
+
+void App::do_inputs() {
+	if (glfwGetKey(window, GLFW_KEY_W)) cam += glm::vec3(0, 0, -0.1);
+	if (glfwGetKey(window, GLFW_KEY_A)) cam += glm::vec3(-0.1, 0, 0);
+	if (glfwGetKey(window, GLFW_KEY_S)) cam += glm::vec3(0, 0, 0.1);
+	if (glfwGetKey(window, GLFW_KEY_D)) cam += glm::vec3(0.1, 0, 0);
+}
+
+void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
+	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	app->cam.rotate(glm::vec3(0, xpos/4, ypos/4));
+}
+void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	switch (key) {
+	case GLFW_KEY_TAB:
+		auto monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+		break;
+	}
+}
+void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
+	App* app = (App*)glfwGetWindowUserPointer(window);
+}
+void App::ResizeCallback(GLFWwindow* window, int width, int height) {
+	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	GLint windowWidth, windowHeight;
+	glfwGetWindowSize(window, &windowWidth, &windowHeight);
+	glViewport(0, 0, windowWidth, windowHeight);
+
+	app->cam.aspectRatio = (float)windowWidth / (float)windowHeight;
+}
+void App::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+	App* app = (App*)glfwGetWindowUserPointer(window);
 }
