@@ -4,10 +4,14 @@
 
 Field::Field(int x, int y) {
 	gen = [](glm::vec3& v) {
-		if (v.y > 0)
+		float newX = v.x;
+		float newY = (sin(v.x) + cos(v.z)) / 4;
+		float newZ = v.z;
+
+		if (v.y >= newY)
 			return;
 
-		v = glm::vec3(v.x, 0, v.z);
+		v = glm::vec3(newX, newY, newZ);
 	};
 
 	x_size = x;
