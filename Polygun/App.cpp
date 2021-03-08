@@ -53,6 +53,8 @@ void App::init() {
 	shader = LS("shader");
 	mvpID = glGetUniformLocation(shader, "MVP");
 	clrID = glGetUniformLocation(shader, "fcolor");
+	normalID = glGetUniformLocation(shader, "normal");
+	viewID = glGetUniformLocation(shader, "view_mat");
 	glUseProgram(shader);
 	//
 
@@ -124,12 +126,21 @@ void App::init() {
 
 void App::pump(std::vector<GLfloat>& v, GLenum type) {
 	int size = v.size();
-
+	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
 
 	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.update()[0][0]);
 
+
+	//Normals for lighting
+	glm::mat4 transformationMatrix = glm::mat4(1);
+	glm::vec3 normal = glm::vec3(0, -1, 0); //TODO calc this
+	glm::vec4 vtxNormal = glm::transpose(glm::inverse(cam.View * transformationMatrix)) * glm::vec4(normal, 1);
+	glUniform4f(normalID, vtxNormal[0], vtxNormal[1], vtxNormal[2], vtxNormal[3]);
+	glUniformMatrix4fv(viewID, 1, GL_FALSE, glm::value_ptr(cam.View));
+
 	glEnableVertexAttribArray(0);
+	//glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 		0,

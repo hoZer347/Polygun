@@ -24,7 +24,7 @@
 #include "Object.h"
 #include "Field.h"
 
-#define SHADER_DIRECTORY "C:/Users/liam/source/repos/Polygun/Polygun/"
+#define SHADER_DIRECTORY "C:/Users/Nnamdi Arimah/source/repos/hoZer347/Polygun/Polygun/"
 
 class App {
 public:
@@ -129,7 +129,7 @@ public:
 
 private:
 		// --Stuff for rendering-- //
-	GLuint shader=0, mvpID=0, clrID=0, vertexbuffer=0, VertexArrayID=0;
+	GLuint shader=0, mvpID=0, clrID=0, vertexbuffer=0, VertexArrayID=0, normalID=0, viewID=0;
 	GLFWwindow* window;
 
 	bool do_verts = true;

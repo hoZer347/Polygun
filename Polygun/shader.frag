@@ -1,9 +1,9 @@
-#version 330 core
+#version 330
 
 out vec4 color;
 
-uniform vec4 fcolor;
+in vec4 fColor;
 
 void main() {
-	color = fcolor;
+	color = fColor;
 }
