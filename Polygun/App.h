@@ -2,7 +2,6 @@
 
 #define GLM_FORCE_RADIANS
 
-
 #include <glew.h>
 #include <glut.h>
 #include <glfw3.h>
@@ -15,14 +14,12 @@
 #include <sstream>
 
 #include <iostream>
+#include <memory>
 
 #include <vector>
 #include <string>
 
-#include "Cube.h"
-#include "Camera.h"
-#include "Object.h"
-#include "Field.h"
+#include "ObjManager.h"
 
 #define SHADER_DIRECTORY "C:/Users/liam/source/repos/Polygun/Polygun/"
 
@@ -109,6 +106,9 @@ public:
 	}
 	//
 
+	// For running tests
+	void test();
+
 	// Starts the game loop
 	void init();
 
@@ -129,25 +129,10 @@ public:
 
 private:
 		// --Stuff for rendering-- //
-	GLuint shader=0, mvpID=0, clrID=0, vertexbuffer=0, VertexArrayID=0;
+	GLuint shader=0, mvpID=0, clrID=0, vao = 0, vbo=0, cbo=0;
 	GLFWwindow* window;
 
 	bool do_verts = true;
 	bool do_frame = true;
-
-	std::vector<GLfloat> vertices;
-	std::vector<GLfloat> frame;
-
-	Camera cam;
-		// ----------------------- //
-
-
-		// --Stuff for physics-- //
-	// Object manager (change to its own class with collision)
-	std::vector<Object*> objects;
-
-	// Manages the floor of the world using a lambda
-	Field* field = NULL;
-		// --------------------- //
 };
 

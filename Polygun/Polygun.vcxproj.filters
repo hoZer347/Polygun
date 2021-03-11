@@ -2,76 +2,33 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Geometry.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Cube.cpp">
+    <ClCompile Include="Geometry.cpp">
       <Filter>Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="Field.cpp">
-      <Filter>Field</Filter>
-    </ClCompile>
-    <ClCompile Include="Plane.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="Points.cpp">
-      <Filter>Geometry</Filter>
-    </ClCompile>
+    <ClCompile Include="ObjManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Geometry.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
+    <ClInclude Include="Geometry.h">
       <Filter>Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="Field.h">
-      <Filter>Field</Filter>
-    </ClInclude>
-    <ClInclude Include="Plane.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="Points.h">
-      <Filter>Geometry</Filter>
-    </ClInclude>
+    <ClInclude Include="ObjManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.frag" />
     <None Include="shader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Geometry">
-      <UniqueIdentifier>{95e2ed78-4cac-4391-9fe2-05a981ae5bb6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="App">
       <UniqueIdentifier>{a19a8e4a-2c54-48ba-9055-9f820b06fc9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{f83a9a9b-10f7-4d6a-b9ba-e2d061735f32}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Object">
-      <UniqueIdentifier>{33372dc4-d5df-4a96-9c63-fa3005c4a441}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Field">
-      <UniqueIdentifier>{265ae739-1024-4935-9101-1e236b3cf5f1}</UniqueIdentifier>
+    <Filter Include="Geometry">
+      <UniqueIdentifier>{275181c1-e623-4064-94a9-592c47edec53}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

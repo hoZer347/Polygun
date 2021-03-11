@@ -29,19 +29,21 @@ App::App() {
 	glfwSetWindowSizeCallback(window, ResizeCallback);
 	glfwSetScrollCallback(window, ScrollCallback);
 
-		// --Test objects-- //
-	Object* o = new Object();
-	Cube* cube = new Cube();
-	*cube += glm::vec3(-0.5, 0.01, -0.5);
-	o->geo.push_back(cube);
-	objects.push_back(o);
+	Vtx v1;
+	Vtx v2;
+	Vtx v3;
+	Vtx v4;
 
-	field = new Field(50, 50);
-	objects.push_back(field);
-		// ---------------- //
+	v1.load({ 0, 0, 0 });
+	v2.load({ 0, 1, 0 });
+	v3.load({ 0, 1, 1 });
 }
 
 App::~App() {
+	
+}
+
+void App::test() {
 
 }
 
@@ -57,14 +59,30 @@ void App::init() {
 	//
 
 	// Generating vertex array
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 	//
 
-	// Generating vertex buffer
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	// Generating buffers
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, &cbo);
+	glBindBuffer(GL_COLOR_ARRAY, cbo);
 	//
+
+	glm::mat4x4 Projection = glm::perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+
+	glm::mat4x4 View = glm::lookAt(
+		glm::vec3(5, 0, 0),
+		glm::vec3(0, 0, 0),
+		glm::vec3(0, 1, 0)
+	);
+
+	glm::mat4x4 Model = glm::mat4(1.0f);
+
+	glm::mat4x4 MVP = Projection * View * Model;
+
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &MVP[0][0]);
 
 	do {
 		// Starting fps timer
@@ -73,37 +91,20 @@ void App::init() {
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Pumping vertices into vertex buffer
-		for (auto& o : objects)
-			for (auto& g : o->geo) {
-				if (do_verts) vertices.insert(vertices.end(), g->vertices.begin(), g->vertices.end());
-				if (do_frame) frame.insert(frame.end(), g->frame.begin(), g->frame.end());
-			}
-
-		std::cout << "Vertex count: ~" << vertices.size() + frame.size() << std::endl;
-
-		pump(vertices, GL_TRIANGLES);
-		pump(frame, GL_LINE_LOOP);
+		// Pumping vertices into the vertex buffer
+		pump(VERTICES, GL_TRIANGLES);
+		pump(FRAME, GL_LINE_LOOP);
 		//
 
-		// Assigning camera position
-		field->get(cam.pos);
-		cam.Projection = glm::perspective(cam.FoV, cam.aspectRatio, 0.1f, cam.renderDistance);
-		//
-
-		// Showing changes
+		// End of loop stuff
 		glfwSwapBuffers(window);
-
-		// Doing inputs
 		glfwPollEvents();
 		do_inputs();
 		//
 
-		// Getting fps
+		// Capping fps
 		double end_time = glfwGetTime();
 		double elapsed_time = end_time - start_time;
-
-		std::cout << "Time elapsed: " << (int)(1000*elapsed_time) << "ms, FPS: " << (int)(1/elapsed_time) << std::endl;
 
 		while (end_time - start_time < 1 / 60)
 			end_time = glfwGetTime();
@@ -113,9 +114,10 @@ void App::init() {
 	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 
 	// Deallocating memory
-	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &vbo);
 	glDeleteProgram(shader);
-	glDeleteVertexArrays(1, &VertexArrayID);
+	glDeleteVertexArrays(1, &vao);
+	glfwDestroyWindow(window);
 	glfwTerminate();
 	//
 
@@ -125,88 +127,59 @@ void App::init() {
 void App::pump(std::vector<GLfloat>& v, GLenum type) {
 	int size = v.size();
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
 
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.update()[0][0]);
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glVertexAttribPointer(
-		0,
-		3,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0
-	);
+	//glEnableVertexAttribArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	switch (type) {
 	case GL_TRIANGLES:
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
+		glBufferData(GL_COLOR_ARRAY, sizeof(GLfloat) * COLOR.size(), COLOR.data(), GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glEnableVertexAttribArray(vbo);
+		glVertexAttribPointer(vbo, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glEnableVertexAttribArray(cbo);
+		glVertexAttribPointer(cbo, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 		glUniform4f(clrID, 1, 1, 1, 1);
+
 		glDrawArrays(type, 0, size);
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+
 		break;
 	case GL_LINE_LOOP:
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
 		glUniform4f(clrID, 0, 0, 0, 1);
 		for (int i = 0; i < size/2; i++)
 			glDrawArrays(type, i*2, 2);
+
+		glDisableVertexAttribArray(0);
 	}
-
-	glDisableVertexAttribArray(0);
-
-	v.clear();
 }
 
 // WASD Movement, SPACE is up, LCONTROL = down
 void App::do_inputs() {
-	// Calculating normals so that moving diagonally isn't faster
-	float dx = sqrt(abs(pow((glfwGetKey(window, GLFW_KEY_A)), 2) - pow((glfwGetKey(window, GLFW_KEY_D)), 2)))/10;
-	float dy = sqrt(abs(pow((glfwGetKey(window, GLFW_KEY_W)), 2) - pow((glfwGetKey(window, GLFW_KEY_S)), 2)))/10;
-
-	// Moving along normals
-	if (glfwGetKey(window, GLFW_KEY_W)) cam += glm::vec3(0, 0, -dy);
-	if (glfwGetKey(window, GLFW_KEY_A)) cam += glm::vec3(-dx, 0, 0);
-	if (glfwGetKey(window, GLFW_KEY_S)) cam += glm::vec3(0, 0, dy);
-	if (glfwGetKey(window, GLFW_KEY_D)) cam += glm::vec3(dx, 0, 0);
-
-	// Moving up or down
-	if (glfwGetKey(window, GLFW_KEY_SPACE)) cam += glm::vec3(0, 0.1, 0);
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) cam += glm::vec3(0, -0.1, 0);
+	App* app = (App*)glfwGetWindowUserPointer(window);
 }
-
 void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
-
-	if (ypos > 89 * 4) ypos = 89 * 4;
-	if (ypos < -89 * 4) ypos = -89 * 4;
-
-	app->cam.rotate(glm::vec3(0, xpos/4, ypos/4));
-
-	glfwSetCursorPos(window, xpos, ypos);
 }
 void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
-
-	switch (key) {
-	case GLFW_KEY_TAB:
-		auto monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-		glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-
-		break;
-	}
 }
 void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 }
 void App::ResizeCallback(GLFWwindow* window, int width, int height) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
-
-	GLint windowWidth, windowHeight;
-	glfwGetWindowSize(window, &windowWidth, &windowHeight);
-	glViewport(0, 0, windowWidth, windowHeight);
-
-	app->cam.aspectRatio = (float)windowWidth / (float)windowHeight;
 }
 void App::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
