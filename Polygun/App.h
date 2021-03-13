@@ -20,8 +20,9 @@
 #include <string>
 
 #include "ObjManager.h"
+#include "Camera.h"
 
-#define SHADER_DIRECTORY "C:/Users/liam/source/repos/Polygun/Polygun/"
+#define SHADER_DIRECTORY "../Polygun/"
 
 class App {
 public:
@@ -106,14 +107,11 @@ public:
 	}
 	//
 
-	// For running tests
-	void test();
-
 	// Starts the game loop
 	void init();
 
-	// Pumps an array of vertices into the vertex buffer
-	void pump(std::vector<GLfloat>&, GLenum);
+	// Pumps the geometry into the buffers
+	void pump();
 
 		// --Inputs functions-- //
 	// Does input polls
@@ -128,11 +126,12 @@ public:
 		// -------------------- //
 
 private:
-		// --Stuff for rendering-- //
-	GLuint shader=0, mvpID=0, clrID=0, vao = 0, vbo=0, cbo=0;
+	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0, mvpID=0;
+	GLint vtxID=0, nrmID=0, clrID=0;
 	GLFWwindow* window;
 
-	bool do_verts = true;
-	bool do_frame = true;
+	float sensitivity = 4;
+
+	Camera cam;
 };
 

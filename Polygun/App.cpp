@@ -7,16 +7,27 @@ App::App() {
 	glfwSetWindowUserPointer(window, this);
 	glfwSetCursorPos(window, 0, 0);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//
 
-	// Enabling openGL to do stuff automatically
+	// Anti-aliasing
+	glEnable(GL_MULTISAMPLE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	//
+	
+	// Blocking stuff that are behind opaque objects
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
+	//
+
+	// Alpha processing setup
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_GREATER, 0.5);
 	glEnable(GL_ALPHA_TEST);
+	//
 
-	glewExperimental = true;
+	// Culling faces that don't face the camera
+	glEnable(GL_CULL_FACE);
 
 	// Starting glew
 	if (glewInit() != GLEW_OK)
@@ -28,23 +39,11 @@ App::App() {
 	glfwSetMouseButtonCallback(window, MouseBCallback);
 	glfwSetWindowSizeCallback(window, ResizeCallback);
 	glfwSetScrollCallback(window, ScrollCallback);
-
-	Vtx v1;
-	Vtx v2;
-	Vtx v3;
-	Vtx v4;
-
-	v1.load({ 0, 0, 0 });
-	v2.load({ 0, 1, 0 });
-	v3.load({ 0, 1, 1 });
+	//
 }
 
 App::~App() {
 	
-}
-
-void App::test() {
-
 }
 
 void App::init() {
@@ -53,8 +52,6 @@ void App::init() {
 
 	// Shader stuff
 	shader = LS("shader");
-	mvpID = glGetUniformLocation(shader, "MVP");
-	clrID = glGetUniformLocation(shader, "fcolor");
 	glUseProgram(shader);
 	//
 
@@ -66,35 +63,90 @@ void App::init() {
 	// Generating buffers
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glGenBuffers(1, &cbo);
-	glBindBuffer(GL_COLOR_ARRAY, cbo);
+	glGenBuffers(1, &ibo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	//
+	
+	// Setting Vertex Attributes / Uniforms
+	vtxID = glGetAttribLocation(shader, "vertex");
+	glVertexAttribPointer(vtxID, 3, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)0);
+	glEnableVertexAttribArray(vtxID);
+
+	nrmID = glGetAttribLocation(shader, "normal");
+	glVertexAttribPointer(nrmID, 3, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)12);
+	glEnableVertexAttribArray(nrmID);
+
+	clrID = glGetAttribLocation(shader, "color");
+	glVertexAttribPointer(clrID, 4, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)24);
+	glEnableVertexAttribArray(clrID);
+
+	do_frame = glGetUniformLocation(shader, "do_frame");
+	
+	mvpID = glGetUniformLocation(shader, "MVP");
 	//
 
-	glm::mat4x4 Projection = glm::perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-
-	glm::mat4x4 View = glm::lookAt(
-		glm::vec3(5, 0, 0),
-		glm::vec3(0, 0, 0),
-		glm::vec3(0, 1, 0)
+	// Testing shapes
+	Field field = Field(
+		glm::mat2x3(
+			0, 0, 0,
+			10, 0, 10
+		), glm::vec4(1, 1, 1, 1)
 	);
 
-	glm::mat4x4 Model = glm::mat4(1.0f);
+	Rpsm cube1 = Rpsm(
+		glm::mat2x3(
+			2, 0, 0,
+			1, 1, 1
+		), glm::vec4(1, 1, 1, 1)
+	);
 
-	glm::mat4x4 MVP = Projection * View * Model;
+	Rpsm cube2 = Rpsm(
+		glm::mat2x3(
+			2, 2, 0,
+			1, 1, 1
+		), glm::vec4(1, 1, 1, 1)
+	);
 
-	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &MVP[0][0]);
+	Plane plane1 = Plane(
+		glm::mat4x3(
+			0, 0, 0,
+			0, 1, 0,
+			1, 1, 0,
+			1, 0, 0
+		), glm::mat4(
+			1, 1, 1, 1,
+			1, 1, 1, 1,
+			1, 1, 1, 1,
+			1, 1, 1, 1)
+	);
+
+	Plane plane2 = Plane(
+		glm::mat4x3(
+			0, 1, 0,
+			0, 2, 0,
+			1, 2, 0,
+			1, 1, 0
+		), glm::mat4(
+			1, 1, 1, 1,
+			1, 1, 1, 1,
+			1, 1, 1, 1,
+			1, 1, 1, 1)
+	);
+
+	cube1.v_inv();
+	plane1.v_inv();
+	//
 
 	do {
-		// Starting fps timer
-		double start_time = glfwGetTime();
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Pumping vertices into the vertex buffer
-		pump(VERTICES, GL_TRIANGLES);
-		pump(FRAME, GL_LINE_LOOP);
-		//
+		// Processing Camera
+		cam.update();
+		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.MVP[0][0]);
+
+		// Pumping vertices
+		pump();
 
 		// End of loop stuff
 		glfwSwapBuffers(window);
@@ -102,21 +154,11 @@ void App::init() {
 		do_inputs();
 		//
 
-		// Capping fps
-		double end_time = glfwGetTime();
-		double elapsed_time = end_time - start_time;
-
-		while (end_time - start_time < 1 / 60)
-			end_time = glfwGetTime();
-		//
-
-		// Testing if the window should close
-	} while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
+		// Closing the window if the window should close
+	} while (glfwWindowShouldClose(window) == 0);
 
 	// Deallocating memory
-	glDeleteBuffers(1, &vbo);
 	glDeleteProgram(shader);
-	glDeleteVertexArrays(1, &vao);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	//
@@ -124,56 +166,51 @@ void App::init() {
 	return;
 }
 
-void App::pump(std::vector<GLfloat>& v, GLenum type) {
-	int size = v.size();
+void App::pump() {
+	// Updating vertices
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vtx) * VERTICES.size(), &VERTICES.data()[0], GL_STATIC_DRAW);
+	
+	// Drawing the frame
+	glUniform1i(do_frame, true);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * FRAME.size(), &FRAME.data()[0], GL_STATIC_DRAW);
+	glDrawElements(GL_LINES, FRAME.size(), GL_UNSIGNED_INT, 0);
 
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
-
-	//glEnableVertexAttribArray(0);
-	//glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	switch (type) {
-	case GL_TRIANGLES:
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * size, v.data(), GL_DYNAMIC_DRAW);
-		glBufferData(GL_COLOR_ARRAY, sizeof(GLfloat) * COLOR.size(), COLOR.data(), GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		glEnableVertexAttribArray(vbo);
-		glVertexAttribPointer(vbo, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-		glEnableVertexAttribArray(cbo);
-		glVertexAttribPointer(cbo, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-		glUniform4f(clrID, 1, 1, 1, 1);
-
-		glDrawArrays(type, 0, size);
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-
-		break;
-	case GL_LINE_LOOP:
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-		glUniform4f(clrID, 0, 0, 0, 1);
-		for (int i = 0; i < size/2; i++)
-			glDrawArrays(type, i*2, 2);
-
-		glDisableVertexAttribArray(0);
-	}
+	// Drawing tris
+	glUniform1i(do_frame, false);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * INDICES.size(), &INDICES.data()[0], GL_STATIC_DRAW);
+	glDrawElements(GL_TRIANGLES, INDICES.size(), GL_UNSIGNED_INT, 0);
 }
 
 // WASD Movement, SPACE is up, LCONTROL = down
 void App::do_inputs() {
 	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	if (glfwGetKey(window, GLFW_KEY_W)) cam.trans({ 0, 0,  0.1 });
+	if (glfwGetKey(window, GLFW_KEY_A)) cam.trans({  0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_S)) cam.trans({ 0, 0, -0.1 });
+	if (glfwGetKey(window, GLFW_KEY_D)) cam.trans({ -0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_SPACE)) cam.trans({ 0,  0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) cam.trans({ 0, -0.1, 0 });
 }
 void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	float s = 1 / app->sensitivity;
+
+	if (ypos*s >  89) glfwSetCursorPos(window, xpos,  89/s);
+	if (ypos*s < -89) glfwSetCursorPos(window, xpos, -89/s);
+
+	app->cam.rot_x(glm::radians(-ypos*s));
+	app->cam.rot_y(glm::radians(xpos*s));
 }
 void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	switch (key) {
+	case GLFW_KEY_ESCAPE:
+		glfwSetWindowShouldClose(window, true);
+		break;
+	}
 }
 void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);

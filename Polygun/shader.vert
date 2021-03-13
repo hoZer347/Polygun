@@ -1,9 +1,16 @@
 #version 410 core
 
-layout(location = 0) in vec3 pos;
+in vec3 vertex;
+in vec3 normal;
+in vec4 color;
+
+out vec4 fcolor;
 
 uniform mat4 MVP;
+uniform bool do_frame;
 
 void main(){
-	gl_Position =  MVP * vec4(pos, 1);
+	if (do_frame)	fcolor = vec4(1, 0, 0, 0.9);
+	else			fcolor = color;
+	gl_Position =  MVP * vec4(vertex, 1);
 }

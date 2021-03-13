@@ -9,6 +9,9 @@
       <Filter>Geometry</Filter>
     </ClCompile>
     <ClCompile Include="ObjManager.cpp" />
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -18,6 +21,9 @@
       <Filter>Geometry</Filter>
     </ClInclude>
     <ClInclude Include="ObjManager.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.frag" />
@@ -29,6 +35,9 @@
     </Filter>
     <Filter Include="Geometry">
       <UniqueIdentifier>{275181c1-e623-4064-94a9-592c47edec53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{26bf43cf-aa4e-4fc5-b5ed-382096ab909f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

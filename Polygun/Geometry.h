@@ -1,93 +1,118 @@
 #pragma once
 
+#define GLM_FORCE_RADIANS
+
+#include "glew.h"
 #include "glfw3.h"
 #include "glm.hpp"
+#include "gtx/rotate_vector.hpp"
+
+#include <stdio.h>
+#include <algorithm>
 #include <vector>
+#include <functional>
 
-// Placeholder values for vertices
-static int DEFAULT_X = 0;
-static int DEFAULT_Y = 1;
-static int DEFAULT_Z = 2;
-static int DEFAULT_R = 0;
-static int DEFAULT_G = 0;
-static int DEFAULT_B = 0;
-static int DEFAULT_A = 0;
-static glm::vec4 DEFAULT_COLOR = { 0, 0, 0, 0};
+struct Vtx;
 
-extern std::vector<GLfloat> VERTICES;
-extern std::vector<GLfloat> FRAME;
-extern std::vector<GLfloat> COLOR;
-//
+extern std::vector<Vtx> VERTICES;
+extern std::vector<GLint> INDICES;
+extern std::vector<GLint> FRAME;
 
 // Vertex
-// Functions as a position (x, y, z) and a color (r, g, b, a)
-class Vtx {
-public:
-	Vtx() {};
-	void load(glm::vec3, glm::vec4={ 1, 1, 1, 1 });
-
-private:
-	int& x = DEFAULT_X;
-	int& y = DEFAULT_Y;
-	int& z = DEFAULT_Z;
-	int& r = DEFAULT_R;
-	int& g = DEFAULT_G;
-	int& b = DEFAULT_B;
-	int& a = DEFAULT_A;
+// Basic Data structure for building shapes
+struct Vtx {
+	glm::vec3 pos = glm::vec3(0);
+	glm::vec3 nrm = glm::vec3(1);
+	glm::vec4 clr = glm::vec4(1);
 };
 
-class Line {
+// Geometry
+// Parent class for geometric shapes
+// Geometries will usually have 2 ways of generation:
+// - Default: Empty class with unassigned variables
+// - Normal Constructor: Unique to each geometry, generates new vertices (parent shapes use this)
+// - mk_ind Constructor: Generates as indices to existing vertices (sub-shapes use this), takes in indices as ints
+class Geometry {
 public:
-	Line() {};
-	void load(glm::mat3x2, glm::vec4={ 1, 1, 1, 1 });
-
-private:
-	int& x1 = DEFAULT_X;
-	int& y1 = DEFAULT_Y;
-	int& z1 = DEFAULT_Z;
-	int& x2 = DEFAULT_X;
-	int& y2 = DEFAULT_Y;
-	int& z2 = DEFAULT_Z;
+	virtual void v_inv()=0;		// Inverts the vertex order to invert normals
+	void operator+=(glm::vec3);	// Translation
+	void operator*=(GLfloat);	// Scaling
+	
+	int v1_index=0, v2_index=0;
+	int f1_index=0, f2_index=0;
+	std::vector<Vtx*> vps;
 };
 
-// Triangle
-// Functions as 3 vertices
-class Tri {
+// Tri
+// Contains 3 vertices
+class Tri : public Geometry {
 public:
+	friend class Plane;
 	Tri() {};
-	void load(glm::mat3, glm::mat4x3=glm::mat4x3(1));
-
-private:
-	Vtx v1;
-	Vtx v2;
-	Vtx v3;
+	Tri(glm::mat3, glm::mat3x4);
+	Tri(int, int, int);
+	void mk_ind(int, int, int);
+	void v_inv();
+protected:
+	Vtx* vp1 = NULL;
+	Vtx* vp2 = NULL;
+	Vtx* vp3 = NULL;
 };
 
 // Plane
-// Functions as a plane between 2 points
-class Plane {
+// Contains 2 Triangles
+class Plane : public Geometry {
 public:
+	friend class Rpsm;
+	friend class Field;
 	Plane() {};
-	void load(glm::vec3, glm::vec3);
-
-private:
-	Tri t1;
-	Tri t2;
+	Plane(glm::mat4x3, glm::mat4);
+	Plane(int, int, int, int);
+	void mk_ind(int, int, int, int);
+	void v_inv();
+protected:
+	Tri tri1;
+	Tri tri2;
 };
 
-// Rectangular prism
-// Functions as 6 planes
-class Rpsm {
+// Rectangular Prism
+// Contains 6 outwards facing planes
+class Rpsm : public Geometry {
 public:
 	Rpsm() {};
-	void load(glm::vec3, glm::vec3);
+	Rpsm(glm::mat2x3, glm::vec4);
+	void v_inv();
+
+protected:
+	Plane pl1;
+	Plane pl2;
+	Plane pl3;
+	Plane pl4;
+	Plane pl5;
+	Plane pl6;
+};
+
+// Default field generation function, returns the input position
+const static std::function<glm::vec3(glm::vec3)> def = [](glm::vec3 v) { return v; };
+const static std::function<glm::vec3(glm::vec3)> tst = [](glm::vec3 v) {
+	float x = v.x;
+	float y = v.y;
+	float z = v.z;
+
+	return glm::vec3(x, cos(x)+sin(z)+y, z);
+};
+
+
+// Field
+// Contains a bunch of points representing a 3 variable function (get)
+class Field : public Geometry {
+public:
+	Field() {};
+	Field(glm::mat2x3, glm::vec4, int=1, std::function<glm::vec3(glm::vec3)> =def);
+	void v_inv();
+
+	std::function<glm::vec3(glm::vec3)> get;
 
 private:
-	// Positions are relative to up=(0, 1, 0)
-	Plane top;
-	Plane bot;
-	Plane frt;
-	Plane bck;
-	Plane lft;
-	Plane rgt;
+	int x_size=0, y_size=0, z_size=0;
 };
