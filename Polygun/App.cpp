@@ -89,61 +89,24 @@ void App::init() {
 	Field field = Field(
 		glm::mat2x3(
 			0, 0, 0,
-			10, 0, 10
-		), glm::vec4(1, 1, 1, 1)
+			100, 0, 100
+		), glm::vec4(1),
+		1, tst
 	);
-
-	Rpsm cube1 = Rpsm(
-		glm::mat2x3(
-			2, 0, 0,
-			1, 1, 1
-		), glm::vec4(1, 1, 1, 1)
-	);
-
-	Rpsm cube2 = Rpsm(
-		glm::mat2x3(
-			2, 2, 0,
-			1, 1, 1
-		), glm::vec4(1, 1, 1, 1)
-	);
-
-	Plane plane1 = Plane(
-		glm::mat4x3(
-			0, 0, 0,
-			0, 1, 0,
-			1, 1, 0,
-			1, 0, 0
-		), glm::mat4(
-			1, 1, 1, 1,
-			1, 1, 1, 1,
-			1, 1, 1, 1,
-			1, 1, 1, 1)
-	);
-
-	Plane plane2 = Plane(
-		glm::mat4x3(
-			0, 1, 0,
-			0, 2, 0,
-			1, 2, 0,
-			1, 1, 0
-		), glm::mat4(
-			1, 1, 1, 1,
-			1, 1, 1, 1,
-			1, 1, 1, 1,
-			1, 1, 1, 1)
-	);
-
-	cube1.v_inv();
-	plane1.v_inv();
 	//
 
+	int age = 0;
+
 	do {
+		double start_time = glfwGetTime();
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Processing Camera
-		cam.update();
-		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.MVP[0][0]);
+		player.cam.update();
+		field.get(player.cam.trns);
+		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &player.cam.MVP[0][0]);
 
 		// Pumping vertices
 		pump();
@@ -153,6 +116,10 @@ void App::init() {
 		glfwPollEvents();
 		do_inputs();
 		//
+
+		double end_time = glfwGetTime();
+
+		// std::cout << end_time-start_time << std::endl;
 
 		// Closing the window if the window should close
 	} while (glfwWindowShouldClose(window) == 0);
@@ -185,23 +152,23 @@ void App::pump() {
 void App::do_inputs() {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 
-	if (glfwGetKey(window, GLFW_KEY_W)) cam.trans({ 0, 0,  0.1 });
-	if (glfwGetKey(window, GLFW_KEY_A)) cam.trans({  0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_S)) cam.trans({ 0, 0, -0.1 });
-	if (glfwGetKey(window, GLFW_KEY_D)) cam.trans({ -0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_SPACE)) cam.trans({ 0,  0.1, 0 });
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) cam.trans({ 0, -0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_W)) player.cam.trans({ 0, 0,  0.1 });
+	if (glfwGetKey(window, GLFW_KEY_A)) player.cam.trans({  0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_S)) player.cam.trans({ 0, 0, -0.1 });
+	if (glfwGetKey(window, GLFW_KEY_D)) player.cam.trans({ -0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_SPACE)) player.cam.trans({ 0,  0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) player.cam.trans({ 0, -0.1, 0 });
 }
 void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 
-	float s = 1 / app->sensitivity;
+	GLfloat s = 1 / app->sensitivity;
 
 	if (ypos*s >  89) glfwSetCursorPos(window, xpos,  89/s);
 	if (ypos*s < -89) glfwSetCursorPos(window, xpos, -89/s);
 
-	app->cam.rot_x(glm::radians(-ypos*s));
-	app->cam.rot_y(glm::radians(xpos*s));
+	app->player.cam.rot_x(glm::radians(-ypos*s));
+	app->player.cam.rot_y(glm::radians(xpos*s));
 }
 void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);

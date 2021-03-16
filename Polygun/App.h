@@ -19,8 +19,9 @@
 #include <vector>
 #include <string>
 
-#include "ObjManager.h"
-#include "Camera.h"
+#include "Geometry.h"
+#include "Object.h"
+#include "Player.h"
 
 #define SHADER_DIRECTORY "../Polygun/"
 
@@ -130,8 +131,10 @@ private:
 	GLint vtxID=0, nrmID=0, clrID=0;
 	GLFWwindow* window;
 
+	std::vector<Prj> projectiles;
+
 	float sensitivity = 4;
 
-	Camera cam;
+	Player player;
 };
 

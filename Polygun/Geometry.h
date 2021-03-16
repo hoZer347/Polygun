@@ -34,13 +34,15 @@ struct Vtx {
 // - mk_ind Constructor: Generates as indices to existing vertices (sub-shapes use this), takes in indices as ints
 class Geometry {
 public:
+	void rm_v();				// Automatically deletes vertex, index, and frame data
 	virtual void v_inv()=0;		// Inverts the vertex order to invert normals
 	void operator+=(glm::vec3);	// Translation
 	void operator*=(GLfloat);	// Scaling
-	
+
+
 	int v1_index=0, v2_index=0;
+	int i1_index = 0, i2_index = 0;
 	int f1_index=0, f2_index=0;
-	std::vector<Vtx*> vps;
 };
 
 // Tri
@@ -53,10 +55,6 @@ public:
 	Tri(int, int, int);
 	void mk_ind(int, int, int);
 	void v_inv();
-protected:
-	Vtx* vp1 = NULL;
-	Vtx* vp2 = NULL;
-	Vtx* vp3 = NULL;
 };
 
 // Plane
@@ -93,25 +91,24 @@ protected:
 };
 
 // Default field generation function, returns the input position
-const static std::function<glm::vec3(glm::vec3)> def = [](glm::vec3 v) { return v; };
-const static std::function<glm::vec3(glm::vec3)> tst = [](glm::vec3 v) {
+const static std::function<void(glm::vec3&)> def = [](glm::vec3& v) { return v; };
+const static std::function<void(glm::vec3&)> tst = [](glm::vec3& v) {	
 	float x = v.x;
-	float y = v.y;
+	float y = (cos(v.x) + sin(v.z) + v.y) / 4;
 	float z = v.z;
 
-	return glm::vec3(x, cos(x)+sin(z)+y, z);
+	v = glm::vec3(x, y, z);
 };
-
 
 // Field
 // Contains a bunch of points representing a 3 variable function (get)
 class Field : public Geometry {
 public:
 	Field() {};
-	Field(glm::mat2x3, glm::vec4, int=1, std::function<glm::vec3(glm::vec3)> =def);
+	Field(glm::mat2x3, glm::vec4, int=1, std::function<void(glm::vec3&)> =def);
 	void v_inv();
 
-	std::function<glm::vec3(glm::vec3)> get;
+	std::function<void(glm::vec3&)> get;
 
 private:
 	int x_size=0, y_size=0, z_size=0;

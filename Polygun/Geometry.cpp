@@ -6,13 +6,28 @@ std::vector<Vtx> VERTICES;
 std::vector<GLint> INDICES;
 std::vector<GLint> FRAME;
 
+void Geometry::rm_v() {
+	VERTICES.erase(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index+1);
+	
+	INDICES.erase(INDICES.begin()+i1_index, INDICES.begin()+i2_index+1);
+
+	FRAME.erase(FRAME.begin()+f1_index, FRAME.begin()+f2_index+1);
+	
+	for (auto& i : INDICES)
+		if (i > v2_index)
+			i -= v2_index-v1_index+1;
+
+	for (auto& i : FRAME)
+		if (i > v2_index)
+			i -= v2_index-v1_index+1;
+}
 void Geometry::operator+=(glm::vec3 v) {
-	for (auto& i : vps)
-		i->pos += v;
+	for (int i = v1_index; i <= v2_index; i++)
+		VERTICES[i].pos += v;
 }
 void Geometry::operator*=(GLfloat f) {
-	for (auto& i : vps)
-		i->pos *= f;
+	for (int i = v1_index; i <= v2_index; i++)
+		VERTICES[i].pos *= f;
 }
 
 Tri::Tri(glm::mat3 pts, glm::mat3x4 clr) {
@@ -47,16 +62,14 @@ Tri::Tri(int i0, int i1, int i2) {
 	f2_index = std::max(i0, std::max(i1, i2));
 }
 void Tri::mk_ind(int i0, int i1, int i2) {
-	vp1 = &VERTICES[i0];
-	vp2 = &VERTICES[i1];
-	vp3 = &VERTICES[i2];
-
+	i1_index = INDICES.size();
 	INDICES.push_back(i0);
 	INDICES.push_back(i1);
 	INDICES.push_back(i2);
+	i2_index = INDICES.size()-1;
 }
 void Tri::v_inv() {
-	std::reverse(VERTICES.begin() + v1_index, VERTICES.begin() + v2_index);
+	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
 }
 
 Plane::Plane(glm::mat4x3 pts, glm::mat4 clr) {
@@ -95,11 +108,10 @@ Plane::Plane(int i0, int i1, int i2, int i3) {
 	f2_index = std::max(i0, std::max(i1, std::max(i2, i3)));
 }
 void Plane::mk_ind(int i0, int i1, int i2, int i3) {
+	i1_index = INDICES.size();
 	tri1 = Tri(i0, i1, i2);
 	tri2 = Tri(i2, i3, i0);
-
-	for (auto& i : tri1.vps) vps.push_back(i);
-	for (auto& i : tri2.vps) vps.push_back(i);
+	i2_index = INDICES.size()-1;
 }
 void Plane::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
@@ -144,21 +156,14 @@ Rpsm::Rpsm(glm::mat2x3 dims, glm::vec4 clr) {
 	int i6 = VERTICES.size()-2;
 	int i7 = VERTICES.size()-1;
 
+	i1_index = INDICES.size();
 	pl1 = Plane(i6, i7, i3, i2);
 	pl2 = Plane(i2, i3, i1, i0);
 	pl3 = Plane(i4, i6, i2, i0);
 	pl4 = Plane(i1, i3, i7, i5);
 	pl5 = Plane(i4, i5, i7, i6);
 	pl6 = Plane(i0, i1, i5, i4);
-
-	vps.push_back(&VERTICES[i0]);
-	vps.push_back(&VERTICES[i1]);
-	vps.push_back(&VERTICES[i2]);
-	vps.push_back(&VERTICES[i3]);
-	vps.push_back(&VERTICES[i4]);
-	vps.push_back(&VERTICES[i5]);
-	vps.push_back(&VERTICES[i6]);
-	vps.push_back(&VERTICES[i7]);
+	i2_index = INDICES.size()-1;
 
 	f1_index = FRAME.size();
 	FRAME.push_back(i0);
@@ -191,12 +196,12 @@ void Rpsm::v_inv() {
 
 }
 
-// dims: the location dims[0] and the dimensions dims[1]
+// dims: the location dims[0] and the di mensions dims[1]
 // clr: the color of the field
 // gen: the lambda that determines where you should be given the inputted values
 // res: the resolution, or space between generated vertices
 // Note - Usually best used when one of the dimensions is 0
-Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<glm::vec3(glm::vec3)> gen) {
+Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<void(glm::vec3&)> gen) {
 	glm::vec3 s = dims[0];
 	glm::vec3 d = dims[1] + glm::vec3(1, 1, 1);
 
@@ -208,21 +213,24 @@ Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<glm::vec3(g
 	for (int x = s.x; x < s.x + d.x; x += res)
 		for (int y = s.y; y < s.y + d.y; y += res)
 			for (int z = s.z; z < s.z + d.z; z += res) {
-				VERTICES.push_back({ get({x, y, z}), {0, 0, 0}, clr });
+				glm::vec3 p = { x, y, z };
+				get(p);
+
+				VERTICES.push_back({ p, {0, 0, 0}, clr });
 
 				if (x > s.x) {
-					FRAME.push_back(VERTICES.size()-1);
-					FRAME.push_back(VERTICES.size()-1-d.y*d.z);
+					FRAME.push_back((GLint)VERTICES.size() - 1);
+					FRAME.push_back((GLint)VERTICES.size() - 1 - d.y * d.z);
 				}
 
 				if (y > s.y) {
-					FRAME.push_back(VERTICES.size()-1);
-					FRAME.push_back(VERTICES.size()-1-d.z);
+					FRAME.push_back((GLint)VERTICES.size() - 1);
+					FRAME.push_back((GLint)VERTICES.size() - 1 - d.z);
 				}
 
 				if (z > s.z) {
-					FRAME.push_back(VERTICES.size()-1);
-					FRAME.push_back(VERTICES.size()-2);
+					FRAME.push_back((GLint)VERTICES.size() - 1);
+					FRAME.push_back((GLint)VERTICES.size() - 2);
 				}
 			}
 	v2_index = VERTICES.size()-1;

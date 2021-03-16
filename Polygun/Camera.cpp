@@ -7,7 +7,7 @@ Camera::Camera() {
 void Camera::update() {
 	Proj = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(
-		camPos + trns,
+		camPos + trns + height,
 		yaw*pitch*roll*(trgPos-camPos) + camPos + trns,
 		up);
 	Mode = glm::mat4(1.0f);
