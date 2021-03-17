@@ -18,9 +18,10 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Geometry.h"
-#include "Object.h"
+#include "ObjManager.h"
 #include "Player.h"
 
 #define SHADER_DIRECTORY "../Polygun/"
@@ -126,15 +127,14 @@ public:
 	static void ScrollCallback(GLFWwindow*, double, double);
 		// -------------------- //
 
+	Player player;
+	ObjManager obj;
+
 private:
 	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0, mvpID=0;
 	GLint vtxID=0, nrmID=0, clrID=0;
 	GLFWwindow* window;
 
-	std::vector<Prj> projectiles;
-
 	float sensitivity = 4;
-
-	Player player;
 };
 

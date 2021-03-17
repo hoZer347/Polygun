@@ -5,23 +5,13 @@
 std::vector<Vtx> VERTICES;
 std::vector<GLint> INDICES;
 std::vector<GLint> FRAME;
+float tst_i = 0;
 
-void Geometry::rm_v() {
-	VERTICES.erase(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index+1);
-	
-	INDICES.erase(INDICES.begin()+i1_index, INDICES.begin()+i2_index+1);
-
-	FRAME.erase(FRAME.begin()+f1_index, FRAME.begin()+f2_index+1);
-	
-	for (auto& i : INDICES)
-		if (i > v2_index)
-			i -= v2_index-v1_index+1;
-
-	for (auto& i : FRAME)
-		if (i > v2_index)
-			i -= v2_index-v1_index+1;
+void Geometry::set_pos(glm::vec3 v) {
+	operator+=(v-VERTICES[v1_index].pos);
 }
 void Geometry::operator+=(glm::vec3 v) {
+	if (empty) return;
 	for (int i = v1_index; i <= v2_index; i++)
 		VERTICES[i].pos += v;
 }
@@ -67,6 +57,7 @@ void Tri::mk_ind(int i0, int i1, int i2) {
 	INDICES.push_back(i1);
 	INDICES.push_back(i2);
 	i2_index = INDICES.size()-1;
+	empty = false;
 }
 void Tri::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
@@ -112,6 +103,7 @@ void Plane::mk_ind(int i0, int i1, int i2, int i3) {
 	tri1 = Tri(i0, i1, i2);
 	tri2 = Tri(i2, i3, i0);
 	i2_index = INDICES.size()-1;
+	empty = false;
 }
 void Plane::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
@@ -191,12 +183,30 @@ Rpsm::Rpsm(glm::mat2x3 dims, glm::vec4 clr) {
 	FRAME.push_back(i6);
 	FRAME.push_back(i7);
 	f2_index = FRAME.size()-1;
+
+	empty = false;
+}
+bool Rpsm::collide(Rpsm& r) {
+	glm::vec3 u1, u2, v1, v2;
+
+	u1 = VERTICES[  v1_index].pos;
+	u2 = VERTICES[  v2_index].pos;
+	v1 = VERTICES[r.v1_index].pos;
+	v2 = VERTICES[r.v2_index].pos;
+
+	if (
+		u1.x > v1.x && u2.x < v2.x &&
+		u1.y > v1.y && u2.y < v2.y &&
+		u1.z > v1.z && u2.z < v2.z
+		) return true;
+
+	return false;
 }
 void Rpsm::v_inv() {
 
 }
 
-// dims: the location dims[0] and the di mensions dims[1]
+// dims: the location dims[0] and the dimensions dims[1]
 // clr: the color of the field
 // gen: the lambda that determines where you should be given the inputted values
 // res: the resolution, or space between generated vertices
@@ -235,8 +245,15 @@ Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<void(glm::v
 			}
 	v2_index = VERTICES.size()-1;
 	f2_index = FRAME.size()-1;
+
+	empty = false;
 	//
 }
 void Field::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
+}
+void Field::update() {
+	if (tst_i)
+		for (auto it = VERTICES.begin() + v1_index; it != VERTICES.begin() + v2_index; it++)
+			get(it->pos);
 }

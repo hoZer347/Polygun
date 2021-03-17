@@ -5,10 +5,12 @@
 #include "Object.h"
 #include "Camera.h"
 
-class Player : public Object {
+class Player {
 public:
 	Player() {};
 	~Player() {};
+
+	void update();
 
 	Camera cam;
 };

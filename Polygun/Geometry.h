@@ -18,6 +18,8 @@ extern std::vector<Vtx> VERTICES;
 extern std::vector<GLint> INDICES;
 extern std::vector<GLint> FRAME;
 
+extern float tst_i;
+
 // Vertex
 // Basic Data structure for building shapes
 struct Vtx {
@@ -34,14 +36,15 @@ struct Vtx {
 // - mk_ind Constructor: Generates as indices to existing vertices (sub-shapes use this), takes in indices as ints
 class Geometry {
 public:
-	void rm_v();				// Automatically deletes vertex, index, and frame data
 	virtual void v_inv()=0;		// Inverts the vertex order to invert normals
+	void set_pos(glm::vec3);	// Sets the new location
 	void operator+=(glm::vec3);	// Translation
-	void operator*=(GLfloat);	// Scaling
+	void operator*=(GLfloat);	// Scaling 
 
+	bool empty = false;
 
 	int v1_index=0, v2_index=0;
-	int i1_index = 0, i2_index = 0;
+	int i1_index=0, i2_index=0;
 	int f1_index=0, f2_index=0;
 };
 
@@ -79,6 +82,7 @@ class Rpsm : public Geometry {
 public:
 	Rpsm() {};
 	Rpsm(glm::mat2x3, glm::vec4);
+	bool collide(Rpsm&);
 	void v_inv();
 
 protected:
@@ -90,11 +94,32 @@ protected:
 	Plane pl6;
 };
 
-// Default field generation function, returns the input position
-const static std::function<void(glm::vec3&)> def = [](glm::vec3& v) { return v; };
-const static std::function<void(glm::vec3&)> tst = [](glm::vec3& v) {	
+// Default field generation function, generates a flat plane
+const static std::function<void(glm::vec3&)> def = [](glm::vec3& v) {
 	float x = v.x;
-	float y = (cos(v.x) + sin(v.z) + v.y) / 4;
+	float y = 0;
+	float z = v.z;
+
+	v = glm::vec3(x, y, z);
+};
+const static std::function<void(glm::vec3&)> tst = [](glm::vec3& v) {
+	if (v.z > 20) {
+		float x = v.x;
+		float y = 3;
+		float z = v.z;
+		v = glm::vec3(x, y, z);
+
+		return;
+	}
+	
+	if (v.x > 20) {
+		def(v);
+		v.y += cos(v.y+tst_i);
+		return;
+	}
+
+	float x = v.x;
+	float y = (cos(v.x+tst_i) + cos(v.z+tst_i*2) + v.y)/4;
 	float z = v.z;
 
 	v = glm::vec3(x, y, z);
@@ -107,6 +132,7 @@ public:
 	Field() {};
 	Field(glm::mat2x3, glm::vec4, int=1, std::function<void(glm::vec3&)> =def);
 	void v_inv();
+	void update();
 
 	std::function<void(glm::vec3&)> get;
 

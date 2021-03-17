@@ -66,7 +66,7 @@ void App::init() {
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	//
-	
+
 	// Setting Vertex Attributes / Uniforms
 	vtxID = glGetAttribLocation(shader, "vertex");
 	glVertexAttribPointer(vtxID, 3, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)0);
@@ -81,36 +81,48 @@ void App::init() {
 	glEnableVertexAttribArray(clrID);
 
 	do_frame = glGetUniformLocation(shader, "do_frame");
-	
+
 	mvpID = glGetUniformLocation(shader, "MVP");
 	//
 
-	// Testing shapes
+	// Populating area
 	Field field = Field(
 		glm::mat2x3(
 			0, 0, 0,
-			100, 0, 100
+			40, 0, 40
 		), glm::vec4(1),
 		1, tst
 	);
+
+	obj = ObjManager(&player, &field);
+
+	Enemy* e1 = new Enemy(glm::vec3(10, 0, 10));
+	Enemy* e2 = new Enemy(glm::vec3(15, 0, 15));
+	Enemy* e3 = new Enemy(glm::vec3(10, 0, 15));
+	 
+	obj.add_enemy(e1);
+	obj.add_enemy(e2);
+	obj.add_enemy(e3);
 	//
 
 	int age = 0;
 
 	do {
 		double start_time = glfwGetTime();
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Processing Camera
-		player.cam.update();
+		player.update();
 		field.get(player.cam.trns);
 		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &player.cam.MVP[0][0]);
+		//
 
+		// Processing objects
+		obj.update();
+		 
 		// Pumping vertices
 		pump();
-
 		// End of loop stuff
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -181,6 +193,12 @@ void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, 
 }
 void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
+
+	switch (button) {
+	case GLFW_MOUSE_BUTTON_LEFT:
+		app->obj.add_proj();
+		break;
+	}
 }
 void App::ResizeCallback(GLFWwindow* window, int width, int height) {
 	App* app = (App*)glfwGetWindowUserPointer(window);

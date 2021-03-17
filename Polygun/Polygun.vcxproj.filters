@@ -15,6 +15,7 @@
       <Filter>Player</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -30,6 +31,7 @@
       <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.frag" />
