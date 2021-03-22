@@ -36,10 +36,6 @@
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.frag" />
-    <None Include="shader.vert" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="gouraud.vert" />
     <Text Include="gouraud.frag" />
   </ItemGroup>
