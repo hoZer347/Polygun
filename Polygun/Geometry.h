@@ -15,6 +15,8 @@
 struct Vtx;
 
 extern std::vector<Vtx> VERTICES;
+extern std::vector<Vtx> VERTICES_f;
+extern std::vector<Vtx> VERTICES_h;
 extern std::vector<GLint> INDICES;
 extern std::vector<GLint> FRAME;
 

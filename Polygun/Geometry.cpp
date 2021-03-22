@@ -3,6 +3,8 @@
 #include <iostream>
 
 std::vector<Vtx> VERTICES;
+std::vector<Vtx> VERTICES_f;
+std::vector<Vtx> VERTICES_h;
 std::vector<GLint> INDICES;
 std::vector<GLint> FRAME;
 float tst_i = 0;

@@ -134,7 +134,7 @@ private:
 	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0,
 		mvpID=0, projID=0, viewID=0, wrldID=0,
 		shineID=0;
-	GLint vtxID=0, nrmID=0, clrID=0;
+	GLint vtxID=0, nrmID=0, clrID=0, Hint=1;
 	GLFWwindow* window;
 
 	int do_A=1, do_D=1, do_S=1;
