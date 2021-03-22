@@ -51,4 +51,8 @@
       <UniqueIdentifier>{fed390a4-11ab-4191-8d00-b3a7d9efcc19}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="gouraud.vert" />
+    <Text Include="gouraud.frag" />
+  </ItemGroup>
 </Project>

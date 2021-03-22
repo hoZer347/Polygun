@@ -206,6 +206,55 @@ void Rpsm::v_inv() {
 
 }
 
+Sphere::Sphere(glm::vec3 pos, glm::vec2 size, glm::vec4 clr, int rad) {
+	//Verticies taken from here:
+	//https://stackoverflow.com/questions/7687148/drawing-sphere-in-opengl-without-using-glusphere
+
+	float pi = 3.14159;
+
+	float lats = size.x;
+	float longs = size.y;
+
+	bool begin = true;
+
+	v1_index = VERTICES.size();
+	i1_index = INDICES.size();
+
+	for (int i = 0; i <= lats; i++) {
+		double lat0 = pi * (-0.5 + (double)(i - 1) / lats);
+		double z0 = sin(lat0);
+		double zr0 = cos(lat0);
+
+		double lat1 = pi * (-0.5 + (double)i / lats);
+		double z1 = sin(lat1);
+		double zr1 = cos(lat1);
+
+		for (int j = 0; j <= longs; j++) {
+			double lng = 2 * pi * (double)(j - 1) / longs;
+			double x = cos(lng);
+			double y = sin(lng);
+
+			glm::vec3 v1 = glm::vec3(rad * x * zr0 + pos.x, rad * y * zr0 + pos.y, rad * z0 + pos.z);
+			glm::vec3 v2 = glm::vec3(rad * x * zr1 + pos.x, rad * y * zr1 + pos.y, rad * z1 + pos.z);
+
+			VERTICES.push_back({ v1, v1-pos, clr });
+			VERTICES.push_back({ v2, v2-pos, clr });
+
+			if (!begin) {
+				planes.push_back(Plane(
+					VERTICES.size() - 1,
+					VERTICES.size() - 3,
+					VERTICES.size() - 4,
+					VERTICES.size() - 2
+				));
+			} else begin = false;
+		}
+	}
+
+	v2_index = VERTICES.size()-1;
+	i1_index = INDICES.size()-1;
+}
+
 // dims: the location dims[0] and the dimensions dims[1]
 // clr: the color of the field
 // gen: the lambda that determines where you should be given the inputted values

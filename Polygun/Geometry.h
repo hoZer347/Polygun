@@ -39,7 +39,7 @@ public:
 	virtual void v_inv()=0;		// Inverts the vertex order to invert normals
 	void set_pos(glm::vec3);	// Sets the new location
 	void operator+=(glm::vec3);	// Translation
-	void operator*=(GLfloat);	// Scaling 
+	void operator*=(GLfloat);	// Scaling
 
 	bool empty = false;
 
@@ -92,6 +92,16 @@ protected:
 	Plane pl4;
 	Plane pl5;
 	Plane pl6;
+};
+
+class Sphere : public Geometry {
+public:
+	Sphere() {}
+	Sphere(glm::vec3, glm::vec2, glm::vec4, int);
+	void v_inv() {};
+
+private:
+	std::vector<Plane> planes;
 };
 
 // Default field generation function, generates a flat plane

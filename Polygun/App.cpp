@@ -51,7 +51,7 @@ void App::init() {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Shader stuff
-	shader = LS("shader");
+	shader = LS("gouraud");
 	glUseProgram(shader);
 	//
 
@@ -81,28 +81,27 @@ void App::init() {
 	glEnableVertexAttribArray(clrID);
 
 	do_frame = glGetUniformLocation(shader, "do_frame");
-
 	mvpID = glGetUniformLocation(shader, "MVP");
+	projID = glGetUniformLocation(shader, "projection_mat");
+	viewID = glGetUniformLocation(shader, "view_mat");
+	wrldID = glGetUniformLocation(shader, "world_mat");
+	shineID = glGetUniformLocation(shader, "shine");
 	//
 
 	// Populating area
-	Field field = Field(
-		glm::mat2x3(
-			0, 0, 0,
-			40, 0, 40
-		), glm::vec4(1),
-		1, tst
+	Sphere sphere1 = Sphere(
+		glm::vec3(100, 0, 100),	// Position
+		glm::vec2(20, 20),		// Longs / Lats
+		glm::vec4(1, 0, 0, 1),	// Color
+		10
 	);
-
-	obj = ObjManager(&player, &field);
-
-	Enemy* e1 = new Enemy(glm::vec3(10, 0, 10));
-	Enemy* e2 = new Enemy(glm::vec3(15, 0, 15));
-	Enemy* e3 = new Enemy(glm::vec3(10, 0, 15));
-	 
-	obj.add_enemy(e1);
-	obj.add_enemy(e2);
-	obj.add_enemy(e3);
+	Sphere sphere2 = Sphere(
+		glm::vec3(140, 0, 100),
+		glm::vec2(20, 20),
+		glm::vec4(0, 1, 0, 1),
+		10
+	);
+	player.cam.trans({ 100, 0, 0 });
 	//
 
 	int age = 0;
@@ -114,12 +113,15 @@ void App::init() {
 
 		// Processing Camera
 		player.update();
-		field.get(player.cam.trns);
+		//field.get(player.cam.trns);
 		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &player.cam.MVP[0][0]);
+		glUniformMatrix4fv(projID, 1, GL_FALSE, &player.cam.Proj[0][0]);
+		glUniformMatrix4fv(viewID, 1, GL_FALSE, &player.cam.View[0][0]);
+		glUniformMatrix4fv(wrldID, 1, GL_FALSE, &player.cam.Mode[0][0]);
 		//
 
 		// Processing objects
-		obj.update();
+		//obj.update();
 		 
 		// Pumping vertices
 		pump();
@@ -130,7 +132,7 @@ void App::init() {
 		//
 
 		double end_time = glfwGetTime();
-
+		
 		// std::cout << end_time-start_time << std::endl;
 
 		// Closing the window if the window should close
@@ -154,22 +156,31 @@ void App::pump() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * FRAME.size(), &FRAME.data()[0], GL_STATIC_DRAW);
 	glDrawElements(GL_LINES, FRAME.size(), GL_UNSIGNED_INT, 0);
 
-	// Drawing tris
+	GLuint phong = glGetUniformLocation(shader, "phong");
+
+	// Drawing first sphere
 	glUniform1i(do_frame, false);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * INDICES.size(), &INDICES.data()[0], GL_STATIC_DRAW);
-	glDrawElements(GL_TRIANGLES, INDICES.size(), GL_UNSIGNED_INT, 0);
+	glUniform1i(phong, false);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * INDICES.size()/2, &INDICES.data()[0], GL_STATIC_DRAW);
+	glDrawElements(GL_TRIANGLES, INDICES.size()/2, GL_UNSIGNED_INT, 0);
+
+	// Drawing second sphere
+	glUniform1i(do_frame, false);
+	glUniform1i(phong, true);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * INDICES.size()/2, &INDICES.data()[INDICES.size()/2], GL_STATIC_DRAW);
+	glDrawElements(GL_TRIANGLES, INDICES.size()/2, GL_UNSIGNED_INT, 0);
 }
 
 // WASD Movement, SPACE is up, LCONTROL = down
 void App::do_inputs() {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 
-	if (glfwGetKey(window, GLFW_KEY_W)) player.cam.trans({ 0, 0,  0.1 });
-	if (glfwGetKey(window, GLFW_KEY_A)) player.cam.trans({  0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_S)) player.cam.trans({ 0, 0, -0.1 });
-	if (glfwGetKey(window, GLFW_KEY_D)) player.cam.trans({ -0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_SPACE)) player.cam.trans({ 0,  0.1, 0 });
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) player.cam.trans({ 0, -0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_W)) player.cam.trans({ 0, 0,  1 });
+	if (glfwGetKey(window, GLFW_KEY_A)) player.cam.trans({  1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_S)) player.cam.trans({ 0, 0, -1 });
+	if (glfwGetKey(window, GLFW_KEY_D)) player.cam.trans({ -1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_SPACE)) player.cam.trans({ 0,  1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) player.cam.trans({ 0, -1, 0 });
 }
 void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
@@ -189,16 +200,91 @@ void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, 
 	case GLFW_KEY_ESCAPE:
 		glfwSetWindowShouldClose(window, true);
 		break;
+	case GLFW_KEY_EQUAL:
+		if (action == GLFW_PRESS) {
+			app->shine += 2.0f;
+			if (app->shine < 1) app->shine = 1;
+			glUniform1f(app->shineID, app->shine);
+		}
+		break;
+	case GLFW_KEY_MINUS:
+		if (action == GLFW_PRESS) {
+			app->shine -= 2.0f;
+			if (app->shine < 1) app->shine = 1;
+			glUniform1f(app->shineID, app->shine);
+		}
+		break;
+	case GLFW_KEY_M:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "do_A");
+			app->do_A = app->do_A * -1 + 1;
+			glUniform1i(toggle, app->do_A);
+		}
+		break;
+	case GLFW_KEY_N:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "do_D");
+			app->do_D = app->do_D * -1 + 1;
+			glUniform1i(toggle, app->do_D);
+		}
+		break;
+	case GLFW_KEY_B:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "do_S");
+			app->do_S = app->do_S * -1 + 1;
+			glUniform1i(toggle, app->do_S);
+		}
+		break;
+	case GLFW_KEY_I:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "x_scale");
+			app->x_scale += 0.5;
+			glUniform1d(toggle, app->x_scale);
+		}
+		break;
+	case GLFW_KEY_J:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "x_scale");
+			if (app->x_scale < 1.1) break;
+			app->x_scale -= 0.5;
+			glUniform1d(toggle, app->x_scale);
+		}
+		break;
+	case GLFW_KEY_K:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "y_scale");
+			app->y_scale += 0.5;
+			glUniform1d(toggle, app->y_scale);
+		}
+		break;
+	case GLFW_KEY_L:
+		if (action == GLFW_PRESS) {
+			GLuint toggle = glGetUniformLocation(app->shader, "y_scale");
+			if (app->y_scale < 1.1) break;
+			app->y_scale -= 0.5;
+			glUniform1d(toggle, app->y_scale);
+		}
+		break;
+	case GLFW_KEY_R:
+		if (action == GLFW_PRESS) {
+			GLuint toggle1 = glGetUniformLocation(app->shader, "x_scale");
+			GLuint toggle2 = glGetUniformLocation(app->shader, "y_scale");
+			app->x_scale = 1;
+			app->y_scale = 1;
+			glUniform1d(toggle1, app->x_scale);
+			glUniform1d(toggle2, app->y_scale);
+		}
+		break;
 	}
 }
 void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 
-	switch (button) {
-	case GLFW_MOUSE_BUTTON_LEFT:
-		app->obj.add_proj();
-		break;
-	}
+	//switch (button) {
+	//case GLFW_MOUSE_BUTTON_LEFT:
+	//	app->obj.add_proj();
+	//	break;
+	//}
 }
 void App::ResizeCallback(GLFWwindow* window, int width, int height) {
 	App* app = (App*)glfwGetWindowUserPointer(window);

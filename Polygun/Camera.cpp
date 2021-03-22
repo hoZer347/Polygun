@@ -1,11 +1,7 @@
 #include "Camera.h"
 
-Camera::Camera() {
-
-}
-
 void Camera::update() {
-	Proj = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+	Proj = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
 	look_from = camPos + trns + height;
 	look_at = yaw * pitch * roll * (trgPos - camPos) + camPos + trns;
