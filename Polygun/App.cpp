@@ -102,22 +102,6 @@ void App::init() {
 		10
 	);
 	player.cam.trans({ 100, 0, 0 });
-
-	VERTICES_f = VERTICES;
-	VERTICES_h = VERTICES;
-
-	for (auto& v : VERTICES_h) {
-		v.pos.x = short(v.pos.x);
-		v.pos.y = short(v.pos.y);
-		v.pos.z = short(v.pos.z);
-		v.nrm.x = short(v.nrm.x);
-		v.nrm.y = short(v.nrm.y);
-		v.nrm.z = short(v.nrm.z);
-		v.clr.r = short(v.clr.r);
-		v.clr.g = short(v.clr.g);
-		v.clr.b = short(v.clr.b);
-		v.clr.a = short(v.clr.a);
-	}
 	//
 
 	int age = 0;
@@ -293,15 +277,9 @@ void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, 
 		break;
 	case GLFW_KEY_H:
 		if (action == GLFW_PRESS) {
-			app->Hint = app->Hint * -1 + 1;
-			if (app->Hint) {
-				VERTICES_h = VERTICES;
-				VERTICES = VERTICES_f;
-			}
-			else {VERTICES_f = VERTICES;
-				VERTICES = VERTICES_h;
-			}
-
+			GLuint toggle = glGetUniformLocation(app->shader, "blinn");
+			app->Hint = app->Hint*-1+1;
+			glUniform1i(toggle, app->Hint);
 		}
 		break;
 	}

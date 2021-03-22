@@ -11,6 +11,7 @@ uniform float time;
 uniform mat4 MVP;
 uniform bool do_frame;
 uniform bool phong = false;
+uniform bool blinn = false;
 
 uniform double x_scale=1;
 uniform double y_scale=1;
@@ -46,11 +47,13 @@ void main() {
         float lambertian = max(dot(N, L), 0.0);
         float specular = 0.0;
         if(lambertian > 0.0) {
-            vec3 R = reflect(-L, N);      // Reflected light vector
-            vec3 V = normalize(-vertPos); // Vector to viewer
-            // Compute the specular term
-            float specAngle = max(dot(R, V), 0.0);
-            specular = pow(specAngle, shine);
+            if (blinn) {
+                vec3 halfwayDir = normalize(L + normalize(-vertPos));
+                specular = pow(max(dot(N, halfwayDir), 0.0), shine);
+            } else {
+                vec3 reflectDir = reflect(-L, N);
+                specular = pow(max(dot(L, reflectDir), 0.0), shine);
+            }
         }
         outColor = fcolor * vec4(
             do_A * coefA * ambient_color +
