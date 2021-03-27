@@ -11,9 +11,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Player</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjManager.cpp" />
   </ItemGroup>
@@ -26,9 +23,6 @@
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Player</Filter>
     </ClInclude>
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjManager.h" />
@@ -46,9 +40,6 @@
     </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{26bf43cf-aa4e-4fc5-b5ed-382096ab909f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Player">
-      <UniqueIdentifier>{fed390a4-11ab-4191-8d00-b3a7d9efcc19}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
