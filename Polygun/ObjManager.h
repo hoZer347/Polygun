@@ -4,12 +4,12 @@
 #include <set>
 
 #include "Object.h"
-#include "Player.h"
+#include "Camera.h"
 
 class ObjManager {
 public:
 	ObjManager() {};
-	ObjManager(Player*, Field*);
+	ObjManager(Camera* c, Field*);
 
 	void del(Object*);
 	void update();
@@ -20,9 +20,9 @@ public:
 	auto begin() { return objs.begin(); };
 
 	std::set<Object*> objs;
+	Camera* cam;
 
 private:
-	Player* p = NULL;
 	Field* f = NULL;
 
 	std::set<Prj*> prjs;

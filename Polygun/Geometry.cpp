@@ -63,14 +63,14 @@ void Tri::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);
 }
 
-Plane::Plane(glm::mat4x3 pts, glm::mat4 clr) {
+Plane::Plane(glm::mat4x3 pts, glm::vec4 clr) {
 	glm::vec3 norm = { 0, 0, 0 };
 
 	v1_index = VERTICES.size();
-	VERTICES.push_back({ pts[0], norm, clr[0] });
-	VERTICES.push_back({ pts[1], norm, clr[1] });
-	VERTICES.push_back({ pts[2], norm, clr[2] });
-	VERTICES.push_back({ pts[3], norm, clr[3] });
+	VERTICES.push_back({ pts[0], norm, clr });
+	VERTICES.push_back({ pts[1], norm, clr });
+	VERTICES.push_back({ pts[2], norm, clr });
+	VERTICES.push_back({ pts[3], norm, clr });
 	v2_index = VERTICES.size()-1;
 
 	int i0 = VERTICES.size()-4;
@@ -91,14 +91,14 @@ Plane::Plane(glm::mat4x3 pts, glm::mat4 clr) {
 	FRAME.push_back(i0);
 	f2_index = FRAME.size()-1;
 }
-Plane::Plane(int i0, int i1, int i2, int i3) {
+Plane::Plane(int i0, int i1, int i2, int i3, bool skip_frame) {
 	mk_ind(i0, i1, i2, i3);
 	v1_index = std::min(i0, std::min(i1, std::min(i2, i3)));
 	v2_index = std::max(i0, std::max(i1, std::max(i2, i3)));
 	f1_index = std::min(i0, std::min(i1, std::min(i2, i3)));
 	f2_index = std::max(i0, std::max(i1, std::max(i2, i3)));
 }
-void Plane::mk_ind(int i0, int i1, int i2, int i3) {
+void Plane::mk_ind(int i0, int i1, int i2, int i3, bool skip_frame) {
 	i1_index = INDICES.size();
 	tri1 = Tri(i0, i1, i2);
 	tri2 = Tri(i2, i3, i0);
@@ -119,6 +119,8 @@ Rpsm::Rpsm(glm::mat2x3 dims, glm::vec4 clr) {
 	GLfloat y2 = dims[1][1];
 	GLfloat z2 = dims[1][2];
 
+	glm::vec3 center = dims[0] + dims[1]/=2;
+
 	glm::vec3 p0 = { x1     , y1     , z1      };
 	glm::vec3 p1 = { x1 + x2, y1     , z1      };
 	glm::vec3 p2 = { x1     , y1 + y2, z1      };
@@ -129,14 +131,14 @@ Rpsm::Rpsm(glm::mat2x3 dims, glm::vec4 clr) {
 	glm::vec3 p7 = { x1 + x2, y1 + y2, z1 + z2 };
 
 	v1_index = VERTICES.size();
-	VERTICES.push_back({ p0, norm, clr });
-	VERTICES.push_back({ p1, norm, clr });
-	VERTICES.push_back({ p2, norm, clr });
-	VERTICES.push_back({ p3, norm, clr });
-	VERTICES.push_back({ p4, norm, clr });
-	VERTICES.push_back({ p5, norm, clr });
-	VERTICES.push_back({ p6, norm, clr });
-	VERTICES.push_back({ p7, norm, clr });
+	VERTICES.push_back({ p0, p0-center, clr });
+	VERTICES.push_back({ p1, p1-center, clr });
+	VERTICES.push_back({ p2, p2-center, clr });
+	VERTICES.push_back({ p3, p3-center, clr });
+	VERTICES.push_back({ p4, p4-center, clr });
+	VERTICES.push_back({ p5, p5-center, clr });
+	VERTICES.push_back({ p6, p6-center, clr });
+	VERTICES.push_back({ p7, p7-center, clr });
 	v2_index = VERTICES.size()-1;
 
 	int i0 = VERTICES.size()-8;
@@ -206,6 +208,55 @@ void Rpsm::v_inv() {
 
 }
 
+Sphere::Sphere(glm::vec3 pos, glm::vec2 size, glm::vec4 clr, int rad) {
+	//Verticies taken from here:
+	//https://stackoverflow.com/questions/7687148/drawing-sphere-in-opengl-without-using-glusphere
+
+	float pi = 3.14159;
+
+	float lats = size.x;
+	float longs = size.y;
+
+	bool begin = true;
+
+	v1_index = VERTICES.size();
+	i1_index = INDICES.size();
+
+	for (int i = 0; i <= lats; i++) {
+		double lat0 = pi * (-0.5 + (double)(i - 1) / lats);
+		double z0 = sin(lat0);
+		double zr0 = cos(lat0);
+
+		double lat1 = pi * (-0.5 + (double)i / lats);
+		double z1 = sin(lat1);
+		double zr1 = cos(lat1);
+
+		for (int j = 0; j <= longs; j++) {
+			double lng = 2 * pi * (double)(j - 1) / longs;
+			double x = cos(lng);
+			double y = sin(lng);
+
+			glm::vec3 v1 = glm::vec3(rad * x * zr0 + pos.x, rad * y * zr0 + pos.y, rad * z0 + pos.z);
+			glm::vec3 v2 = glm::vec3(rad * x * zr1 + pos.x, rad * y * zr1 + pos.y, rad * z1 + pos.z);
+
+			VERTICES.push_back({ v1, v1 - pos, clr });
+			VERTICES.push_back({ v2, v2 - pos, clr });
+
+			if (!begin) {
+				planes.push_back(Plane(
+					VERTICES.size() - 1,
+					VERTICES.size() - 3,
+					VERTICES.size() - 4,
+					VERTICES.size() - 2
+				));
+			} else begin = false;
+		}
+	}
+
+	v2_index = VERTICES.size() - 1;
+	i1_index = INDICES.size() - 1;
+}
+
 // dims: the location dims[0] and the dimensions dims[1]
 // clr: the color of the field
 // gen: the lambda that determines where you should be given the inputted values
@@ -214,6 +265,10 @@ void Rpsm::v_inv() {
 Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<void(glm::vec3&)> gen) {
 	glm::vec3 s = dims[0];
 	glm::vec3 d = dims[1] + glm::vec3(1, 1, 1);
+
+	x_size = d.x;
+	y_size = d.y;
+	z_size = d.z;
 
 	get = gen;
 
@@ -226,21 +281,21 @@ Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<void(glm::v
 				glm::vec3 p = { x, y, z };
 				get(p);
 
-				VERTICES.push_back({ p, {0, 0, 0}, clr });
+				VERTICES.push_back({ p, { 0, 1, 0 }, clr });
 
 				if (x > s.x) {
-					FRAME.push_back((GLint)VERTICES.size() - 1);
-					FRAME.push_back((GLint)VERTICES.size() - 1 - d.y * d.z);
+					FRAME.push_back((GLint)VERTICES.size()-1);
+					FRAME.push_back((GLint)VERTICES.size()-1-d.y*d.z);
 				}
 
 				if (y > s.y) {
-					FRAME.push_back((GLint)VERTICES.size() - 1);
-					FRAME.push_back((GLint)VERTICES.size() - 1 - d.z);
+					FRAME.push_back((GLint)VERTICES.size()-1);
+					FRAME.push_back((GLint)VERTICES.size()-1-d.z);
 				}
 
 				if (z > s.z) {
-					FRAME.push_back((GLint)VERTICES.size() - 1);
-					FRAME.push_back((GLint)VERTICES.size() - 2);
+					FRAME.push_back((GLint)VERTICES.size()-1);
+					FRAME.push_back((GLint)VERTICES.size()-2);
 				}
 			}
 	v2_index = VERTICES.size()-1;
@@ -248,6 +303,22 @@ Field::Field(glm::mat2x3 dims, glm::vec4 clr, int res, std::function<void(glm::v
 
 	empty = false;
 	//
+}
+void Field::add_face() {
+	for (int x = 0; x < x_size-1; x++)
+		for (int y = 0; y < y_size-1; y++) {
+
+		}
+
+	for (int x = 0; x < x_size-1; x++)
+		for (int z = 0; z < z_size-1; z++) {
+			Plane(z+x*x_size, z+x*x_size+1, z+(x+1)*x_size+1, z+(x+1)*x_size);
+		}
+
+	for (int y = 0; y < y_size-1; y++)
+		for (int z = 0; z < z_size-1; z++) {
+
+		}
 }
 void Field::v_inv() {
 	std::reverse(VERTICES.begin()+v1_index, VERTICES.begin()+v2_index);

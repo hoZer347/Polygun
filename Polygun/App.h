@@ -22,7 +22,7 @@
 
 #include "Geometry.h"
 #include "ObjManager.h"
-#include "Player.h"
+#include "Camera.h"
 
 #define SHADER_DIRECTORY "../Polygun/"
 
@@ -127,12 +127,13 @@ public:
 	static void ScrollCallback(GLFWwindow*, double, double);
 		// -------------------- //
 
-	Player player;
+	Camera cam;
 	ObjManager obj;
 
 private:
 	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0, mvpID=0;
-	GLint vtxID=0, nrmID=0, clrID=0;
+	GLint vtxID=0, nrmID=0, clrID=0, mdlID=0, viwID=0, prjID=0;
+	GLuint shading=0;
 	GLFWwindow* window;
 
 	float sensitivity = 4;

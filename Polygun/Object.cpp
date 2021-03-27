@@ -21,8 +21,8 @@ void Prj::update() {
 Enemy::Enemy(glm::vec3 v) {
 	hit_box = Rpsm(
 		glm::mat2x3(
-			v.x, v.y, v.z,
-			1, 1, 1
+			v,
+			glm::vec3(1)
 		), glm::vec4(1)
 	);
 

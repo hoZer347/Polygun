@@ -24,7 +24,7 @@ extern float tst_i;
 // Basic Data structure for building shapes
 struct Vtx {
 	glm::vec3 pos = glm::vec3(0);
-	glm::vec3 nrm = glm::vec3(1);
+	glm::vec3 nrm = glm::vec3(0);
 	glm::vec4 clr = glm::vec4(1);
 };
 
@@ -67,9 +67,9 @@ public:
 	friend class Rpsm;
 	friend class Field;
 	Plane() {};
-	Plane(glm::mat4x3, glm::mat4);
-	Plane(int, int, int, int);
-	void mk_ind(int, int, int, int);
+	Plane(glm::mat4x3, glm::vec4);
+	Plane(int, int, int, int, bool=false);
+	void mk_ind(int, int, int, int, bool=false);
 	void v_inv();
 protected:
 	Tri tri1;
@@ -92,6 +92,16 @@ protected:
 	Plane pl4;
 	Plane pl5;
 	Plane pl6;
+};
+
+class Sphere : public Geometry {
+public:
+	Sphere() {}
+	Sphere(glm::vec3, glm::vec2, glm::vec4, int);
+	void v_inv() {};
+
+private:
+	std::vector<Plane> planes;
 };
 
 // Default field generation function, generates a flat plane
@@ -131,6 +141,7 @@ class Field : public Geometry {
 public:
 	Field() {};
 	Field(glm::mat2x3, glm::vec4, int=1, std::function<void(glm::vec3&)> =def);
+	void add_face();
 	void v_inv();
 	void update();
 

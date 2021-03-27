@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-ObjManager::ObjManager(Player* player, Field* field) {
-	p = player;
+ObjManager::ObjManager(Camera* c, Field* field) {
+	cam = c;
 	f = field;
 }
 
@@ -80,7 +80,7 @@ void ObjManager::add_enemy(Enemy* e) {
 
 void ObjManager::add_proj() {
 	glm::vec3 v1, v2;
-	p->cam.get_pos(v1, v2);
+	cam->get_pos(v1, v2);
 
 	Prj* prj = new Prj(v1, (v2 - v1) /= 10);
 

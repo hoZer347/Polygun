@@ -81,8 +81,11 @@ void App::init() {
 	glEnableVertexAttribArray(clrID);
 
 	do_frame = glGetUniformLocation(shader, "do_frame");
-
+	
 	mvpID = glGetUniformLocation(shader, "MVP");
+	mdlID = glGetUniformLocation(shader, "mode");
+	viwID = glGetUniformLocation(shader, "view");
+	prjID = glGetUniformLocation(shader, "proj");
 	//
 
 	// Populating area
@@ -90,11 +93,13 @@ void App::init() {
 		glm::mat2x3(
 			0, 0, 0,
 			40, 0, 40
-		), glm::vec4(1),
+		), glm::vec4(1, 1, 1, 1),
 		1, tst
 	);
 
-	obj = ObjManager(&player, &field);
+	field.add_face();
+
+	obj = ObjManager(&cam, &field);
 
 	Enemy* e1 = new Enemy(glm::vec3(10, 0, 10));
 	Enemy* e2 = new Enemy(glm::vec3(15, 0, 15));
@@ -103,19 +108,30 @@ void App::init() {
 	obj.add_enemy(e1);
 	obj.add_enemy(e2);
 	obj.add_enemy(e3);
+
+	Sphere sphere = Sphere(
+		glm::vec3(0, 10, 0),
+		glm::vec2(20, 20),
+		glm::vec4(1, 1, 1, 1),
+		10
+	);
 	//
 
 	int age = 0;
 
 	do {
 		double start_time = glfwGetTime();
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Processing Camera
-		player.update();
-		field.get(player.cam.trns);
-		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &player.cam.MVP[0][0]);
+		cam.update();
+		field.get(cam.trns);
+		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.MVP[0][0]);
+		glUniformMatrix4fv(mdlID, 1, GL_FALSE, &cam.Mode[0][0]);
+		glUniformMatrix4fv(viwID, 1, GL_FALSE, &cam.View[0][0]);
+		glUniformMatrix4fv(prjID, 1, GL_FALSE, &cam.Proj[0][0]);
 		//
 
 		// Processing objects
@@ -164,12 +180,12 @@ void App::pump() {
 void App::do_inputs() {
 	App* app = (App*)glfwGetWindowUserPointer(window);
 
-	if (glfwGetKey(window, GLFW_KEY_W)) player.cam.trans({ 0, 0,  0.1 });
-	if (glfwGetKey(window, GLFW_KEY_A)) player.cam.trans({  0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_S)) player.cam.trans({ 0, 0, -0.1 });
-	if (glfwGetKey(window, GLFW_KEY_D)) player.cam.trans({ -0.1, 0, 0 });
-	if (glfwGetKey(window, GLFW_KEY_SPACE)) player.cam.trans({ 0,  0.1, 0 });
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) player.cam.trans({ 0, -0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_W)) cam.trans({ 0, 0,  0.1 });
+	if (glfwGetKey(window, GLFW_KEY_A)) cam.trans({  0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_S)) cam.trans({ 0, 0, -0.1 });
+	if (glfwGetKey(window, GLFW_KEY_D)) cam.trans({ -0.1, 0, 0 });
+	if (glfwGetKey(window, GLFW_KEY_SPACE)) cam.trans({ 0,  0.1, 0 });
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)) cam.trans({ 0, -0.1, 0 });
 }
 void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
@@ -179,8 +195,8 @@ void App::CursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	if (ypos*s >  89) glfwSetCursorPos(window, xpos,  89/s);
 	if (ypos*s < -89) glfwSetCursorPos(window, xpos, -89/s);
 
-	app->player.cam.rot_x(glm::radians(-ypos*s));
-	app->player.cam.rot_y(glm::radians(xpos*s));
+	app->cam.rot_x(glm::radians(-ypos*s));
+	app->cam.rot_y(glm::radians(xpos*s));
 }
 void App::KeyPrsCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	App* app = (App*)glfwGetWindowUserPointer(window);
