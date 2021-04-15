@@ -136,6 +136,7 @@ private:
 	GLuint shading=0;
 	GLFWwindow* window;
 
+	bool dyn_light = false;
 	float sensitivity = 4;
 };
 

@@ -20,7 +20,7 @@ public:
 	auto begin() { return objs.begin(); };
 
 	std::set<Object*> objs;
-	Camera* cam;
+	Camera* cam=NULL;
 
 private:
 	Field* f = NULL;

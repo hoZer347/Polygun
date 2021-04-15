@@ -51,3 +51,7 @@ void Camera::get_pos(glm::vec3& v1, glm::vec3& v2) {
 	v1 = look_from;
 	v2 = look_at;
 }
+
+glm::vec3 Camera::get_pos1() {
+	return trns;
+}

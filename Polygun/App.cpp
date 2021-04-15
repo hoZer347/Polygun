@@ -122,12 +122,19 @@ void App::init() {
 	do {
 		double start_time = glfwGetTime();
 
+		if (dyn_light) {
+			GLuint lp = glGetUniformLocation(shader, "lightPos");
+			glm::vec3 p;
+			p = cam.get_pos1();
+			glUniform3f(lp, p.x, p.y, p.z);
+			
+		} else field.get(cam.trns);
+
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Processing Camera
 		cam.update();
-		field.get(cam.trns);
 		glUniformMatrix4fv(mvpID, 1, GL_FALSE, &cam.MVP[0][0]);
 		glUniformMatrix4fv(mdlID, 1, GL_FALSE, &cam.Mode[0][0]);
 		glUniformMatrix4fv(viwID, 1, GL_FALSE, &cam.View[0][0]);
@@ -213,6 +220,15 @@ void App::MouseBCallback(GLFWwindow* window, int button, int action, int mods) {
 	switch (button) {
 	case GLFW_MOUSE_BUTTON_LEFT:
 		app->obj.add_proj();
+		break;
+	case GLFW_MOUSE_BUTTON_RIGHT:
+		if (app->dyn_light)
+			app->dyn_light = false;
+		else {
+			app->dyn_light = true;
+			//GLuint lp = glGetUniformLocation(app->shader, "lightPos");
+			//glUniform3f(lp, 100, 100, 100);
+		}
 		break;
 	}
 }

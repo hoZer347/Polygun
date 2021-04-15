@@ -18,6 +18,7 @@ public:
 	void trans(glm::vec3);
 
 	void get_pos(glm::vec3&, glm::vec3&);
+	glm::vec3 get_pos1();
 
 	glm::mat4 MVP;
 	glm::vec3 trns = { 20, 0, 25 };

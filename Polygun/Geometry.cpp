@@ -312,7 +312,7 @@ void Field::add_face() {
 
 	for (int x = 0; x < x_size-1; x++)
 		for (int z = 0; z < z_size-1; z++) {
-			Plane(z+x*x_size, z+x*x_size+1, z+(x+1)*x_size+1, z+(x+1)*x_size);
+			Plane p = Plane(z+x*x_size, z+x*x_size+1, z+(x+1)*x_size+1, z+(x+1)*x_size);
 		}
 
 	for (int y = 0; y < y_size-1; y++)
@@ -325,6 +325,13 @@ void Field::v_inv() {
 }
 void Field::update() {
 	if (tst_i)
-		for (auto it = VERTICES.begin() + v1_index; it != VERTICES.begin() + v2_index; it++)
+		for (auto it = VERTICES.begin() + v1_index; it != VERTICES.begin() + v2_index; it++) {
 			get(it->pos);
+			
+			glm::vec3 p = it->pos - glm::vec3(0.001, 0, 0.001);
+			get(p);
+
+			it->nrm = glm::normalize(it->pos);
+		}
+
 }
