@@ -7,7 +7,7 @@ Prj::Prj(glm::vec3 p, glm::vec3 v, int m) {
 		glm::mat2x3(
 			p.x, p.y, p.z,
 			0.1, 0.1, 0.1
-		), glm::vec4(1, 1, 1, 1)
+		), glm::vec4(0, 0, 1, 1)
 	);
 	vec = v;
 	max_age = m;

@@ -85,8 +85,8 @@ void App::init() {
 	glEnableVertexAttribArray(cdsID);
 
 	do_frame = glGetUniformLocation(shader, "do_frame");
-	
 	do_tex = glGetUniformLocation(shader, "do_tex");
+
 	mvpID = glGetUniformLocation(shader, "MVP");
 	mdlID = glGetUniformLocation(shader, "mode");
 	viwID = glGetUniformLocation(shader, "view");
