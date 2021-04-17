@@ -11,11 +11,15 @@
 in vec3 fnormal;
 in vec3 fvertex;
 in vec4 fcolor;
+in vec2 ftexCoords;
+
+uniform sampler2D tex;
 
 uniform float Ka = 0.2;
 uniform float Kd = 0.7;
 uniform float Ks = 0.8;
 uniform float shine = 5;
+uniform bool do_tex = false;
 
 uniform vec3 lightPos = {100, 100, 100};
 
@@ -39,5 +43,5 @@ void main() {
     specular = pow(specAngle, shine);
   }
   outColor = vec4(Ka * vec3(fcolor) + Kd * lambertian * vec3(fcolor) + Ks * specular * vec3(fcolor), 1.0);
-
+  if (do_tex) outColor *= texture2D(tex, ftexCoords);
 }

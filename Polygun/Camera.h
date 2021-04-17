@@ -21,7 +21,7 @@ public:
 	glm::vec3 get_pos1();
 
 	glm::mat4 MVP;
-	glm::vec3 trns = { 20, 0, 25 };
+	glm::vec3 trns = { -1, 0, -1 };
 	glm::mat4 Proj, View, Mode;
 
 private:

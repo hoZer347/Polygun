@@ -25,7 +25,8 @@ extern float tst_i;
 struct Vtx {
 	glm::vec3 pos = glm::vec3(0);
 	glm::vec3 nrm = glm::vec3(0);
-	glm::vec4 clr = glm::vec4(1);
+	glm::vec4 clr = glm::vec4(1, 0, 0, 1);
+	glm::vec2 tex = glm::vec2(0);
 };
 
 // Geometry

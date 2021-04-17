@@ -9,6 +9,7 @@
 #include <gtc/quaternion.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <SOIL.h>
 
 #include <fstream>
 #include <sstream>
@@ -131,12 +132,17 @@ public:
 	ObjManager obj;
 
 private:
-	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0, mvpID=0;
-	GLint vtxID=0, nrmID=0, clrID=0, mdlID=0, viwID=0, prjID=0;
+	GLuint shader=0, vao=0, vbo=0, ibo=0, do_frame=0, do_tex=0, mvpID=0;
+	GLint vtxID=0, nrmID=0, clrID=0, mdlID=0, viwID=0, prjID=0, cdsID=0;
 	GLuint shading=0;
 	GLFWwindow* window;
 
-	bool dyn_light = false;
+	bool dyn_light=false;
 	float sensitivity = 4;
+
+	Plane plane;
+	int T = 0;
+
+	GLuint texture=0, texID=0;
 };
 

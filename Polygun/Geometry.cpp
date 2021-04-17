@@ -5,6 +5,7 @@
 std::vector<Vtx> VERTICES;
 std::vector<GLint> INDICES;
 std::vector<GLint> FRAME;
+std::vector<GLint> TEX;
 float tst_i = 0;
 
 void Geometry::set_pos(glm::vec3 v) {
@@ -72,7 +73,7 @@ Plane::Plane(glm::mat4x3 pts, glm::vec4 clr) {
 	VERTICES.push_back({ pts[2], norm, clr });
 	VERTICES.push_back({ pts[3], norm, clr });
 	v2_index = VERTICES.size()-1;
-
+	
 	int i0 = VERTICES.size()-4;
 	int i1 = VERTICES.size()-3;
 	int i2 = VERTICES.size()-2;

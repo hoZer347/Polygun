@@ -80,12 +80,36 @@ void App::init() {
 	glVertexAttribPointer(clrID, 4, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)24);
 	glEnableVertexAttribArray(clrID);
 
+	cdsID = glGetAttribLocation(shader, "texCoords");
+	glVertexAttribPointer(cdsID, 2, GL_FLOAT, GL_FALSE, sizeof(Vtx), (void*)40);
+	glEnableVertexAttribArray(cdsID);
+
 	do_frame = glGetUniformLocation(shader, "do_frame");
 	
+	do_tex = glGetUniformLocation(shader, "do_tex");
 	mvpID = glGetUniformLocation(shader, "MVP");
 	mdlID = glGetUniformLocation(shader, "mode");
 	viwID = glGetUniformLocation(shader, "view");
 	prjID = glGetUniformLocation(shader, "proj");
+	//
+
+	// Setting Textures
+	texID = glGetUniformLocation(shader, "tex");
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	int width, height;
+	unsigned char* image = SOIL_load_image("cpt.png", &width, &height, 0, SOIL_LOAD_AUTO);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 	//
 
 	// Populating area
@@ -115,6 +139,27 @@ void App::init() {
 		glm::vec4(1, 1, 1, 1),
 		10
 	);
+
+	T = INDICES.size();
+
+	plane = Plane(
+		glm::mat4x3(
+			0, 10, 10,
+			0, 10, 20,
+			0, 20, 20,
+			0, 20, 10
+		), glm::vec4(1, 1, 1, 0.1f)
+	);
+
+	VERTICES[plane.v1_index + 0].tex = { 1, 0 };
+	VERTICES[plane.v1_index + 1].tex = { 1, 1 };
+	VERTICES[plane.v1_index + 2].tex = { 0, 1 };
+	VERTICES[plane.v1_index + 3].tex = { 0, 0 };
+
+	VERTICES[plane.v1_index + 0].nrm = { 1, 0, 0 };
+	VERTICES[plane.v1_index + 1].nrm = { 1, 0, 0 };
+	VERTICES[plane.v1_index + 2].nrm = { 1, 0, 0 };
+	VERTICES[plane.v1_index + 3].nrm = { 1, 0, 0 };
 	//
 
 	int age = 0;
@@ -124,10 +169,9 @@ void App::init() {
 
 		if (dyn_light) {
 			GLuint lp = glGetUniformLocation(shader, "lightPos");
-			glm::vec3 p;
-			p = cam.get_pos1();
+			glm::vec3 p, p1;
+			cam.get_pos(p, p1);
 			glUniform3f(lp, p.x, p.y, p.z);
-			
 		} else field.get(cam.trns);
 
 		// Clear the screen
@@ -176,11 +220,18 @@ void App::pump() {
 	glUniform1i(do_frame, true);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * FRAME.size(), &FRAME.data()[0], GL_STATIC_DRAW);
 	glDrawElements(GL_LINES, FRAME.size(), GL_UNSIGNED_INT, 0);
+	glUniform1i(do_frame, false);
 
 	// Drawing tris
-	glUniform1i(do_frame, false);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * INDICES.size(), &INDICES.data()[0], GL_STATIC_DRAW);
+	//glDrawElements(GL_TRIANGLES, INDICES.size(), GL_UNSIGNED_INT, 0);
+
+	// Drawing Textures
+	glUniform1i(do_tex, true);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLint) * 6, &INDICES.data()[T], GL_STATIC_DRAW);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glDrawElements(GL_TRIANGLES, INDICES.size(), GL_UNSIGNED_INT, 0);
+	glUniform1i(do_tex, false);
 }
 
 // WASD Movement, SPACE is up, LCONTROL = down

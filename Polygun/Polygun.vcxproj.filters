@@ -42,4 +42,7 @@
       <UniqueIdentifier>{26bf43cf-aa4e-4fc5-b5ed-382096ab909f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="README.txt" />
+  </ItemGroup>
 </Project>
